@@ -1,10 +1,13 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import BackgroundRemovalProcessor from "./BackgroundRemovalProcessor";
 
 const Hero = () => {
+  const [processedImageUrl, setProcessedImageUrl] = useState<string>("");
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50">
       {/* Navigation */}
@@ -78,11 +81,23 @@ const Hero = () => {
           {/* Right Image */}
           <div className="relative">
             <div className="relative">
-              <img 
-                src="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png" 
-                alt="Happy traveler with backpack" 
-                className="w-full h-auto max-w-lg mx-auto"
+              <BackgroundRemovalProcessor 
+                imageUrl="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png"
+                onProcessed={setProcessedImageUrl}
               />
+              {processedImageUrl ? (
+                <img 
+                  src={processedImageUrl} 
+                  alt="Happy traveler with backpack" 
+                  className="w-full h-auto max-w-lg mx-auto"
+                />
+              ) : (
+                <img 
+                  src="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png" 
+                  alt="Happy traveler with backpack" 
+                  className="w-full h-auto max-w-lg mx-auto"
+                />
+              )}
               
               {/* Decorative elements */}
               <div className="absolute top-10 right-10 text-blue-500 opacity-70">

@@ -11,6 +11,7 @@ import Communities from "./pages/Communities";
 import TripRoomDetail from "./pages/TripRoomDetail";
 import Messaging from "./pages/Messaging";
 import Profile from "./pages/Profile";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/flash-trip-rooms" element={<FlashTripRooms />} />
           <Route path="/trip-room/:id" element={<TripRoomDetail />} />
           <Route path="/travel-stories" element={<TravelStories />} />

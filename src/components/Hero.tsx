@@ -79,7 +79,7 @@ const Hero = () => {
           <div className="relative">
             <div className="relative">
               <img 
-                src="/placeholder.svg" 
+                src="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png" 
                 alt="Happy traveler with backpack" 
                 className="w-full h-auto max-w-lg mx-auto"
               />

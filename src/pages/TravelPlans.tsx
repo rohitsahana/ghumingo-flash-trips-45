@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, MapPin, Calendar, Star, CheckCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -15,6 +16,12 @@ const formatCurrency = (amount: number) =>
 const TravelPlans = () => (
   <div className="py-16 bg-gradient-to-b from-orange-50/30 to-blue-50/30 min-h-screen">
     <div className="container mx-auto px-6">
+      <div className="flex justify-center mb-8">
+        <Link to="/" className="flex items-center space-x-2 group">
+          <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-blue-500 rounded-full group-hover:scale-110 transition-transform"></div>
+          <span className="text-2xl font-bold text-gray-800 group-hover:text-orange-600 transition-colors">Ghumingo</span>
+        </Link>
+      </div>
       <div className="text-center mb-12">
         <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-600 to-blue-600 bg-clip-text text-transparent">
           All Travel Plans

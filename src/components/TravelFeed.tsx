@@ -1,6 +1,7 @@
 
 import TravelPost from "./TravelPost";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const TravelFeed = () => {
   const posts = [
@@ -52,7 +53,7 @@ const TravelFeed = () => {
   ];
 
   return (
-    <div className="py-16 bg-white">
+    <div id="travel-stories" className="py-16 bg-white">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-gray-800">
@@ -70,7 +71,12 @@ const TravelFeed = () => {
         </div>
 
         <div className="text-center mt-12">
-          <p className="text-gray-600">
+          <Link to="/travel-stories">
+            <Button className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 text-lg rounded-md">
+              Show More Stories
+            </Button>
+          </Link>
+          <p className="text-gray-600 mt-4">
             Join our community to share your travel stories and discover new adventures
           </p>
         </div>

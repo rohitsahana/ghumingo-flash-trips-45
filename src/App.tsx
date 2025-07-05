@@ -13,6 +13,7 @@ import TripRoomDetail from "./pages/TripRoomDetail";
 import Messaging from "./pages/Messaging";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import TravelPlans from "./pages/TravelPlans";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/communities" element={<Communities />} />
             <Route path="/messaging/:userId" element={<Messaging />} />
             <Route path="/profile/:userId" element={<Profile />} />
+            <Route path="/travel-plans" element={<TravelPlans />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

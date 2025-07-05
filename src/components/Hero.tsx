@@ -79,14 +79,18 @@ const Hero = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/travel-stories">
-                <Button 
-                  size="lg" 
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 text-lg rounded-md w-full sm:w-auto"
-                >
-                  Start Your Journey
-                </Button>
-              </Link>
+              <Button 
+                size="lg" 
+                className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 text-lg rounded-md w-full sm:w-auto"
+                onClick={() => {
+                  const element = document.getElementById('travel-stories');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+              >
+                Start Your Journey
+              </Button>
               <Link to="/flash-trip-rooms">
                 <Button 
                   size="lg" 

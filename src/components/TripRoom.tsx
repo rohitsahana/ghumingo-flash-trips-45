@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 interface TripRoomProps {
+  id: string;
   destination: string;
   dates: string;
   budget: string;
@@ -25,6 +26,7 @@ interface TripRoomProps {
 }
 
 const TripRoom = ({ 
+  id,
   destination, 
   dates, 
   budget, 
@@ -131,7 +133,7 @@ const TripRoom = ({
       </div>
 
       {/* Action button */}
-      <Link to={`/trip-room/${Math.floor(Math.random() * 100) + 1}`}>
+      <Link to={`/trip-room/${id}`}>
         <Button 
           className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
           disabled={spotsLeft === 0}

@@ -1,53 +1,56 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Users, MapPin, Calendar, Star, Shield } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { getTripRoom, joinTripRoom, type TripRoom } from "@/data/tripRooms";
 
 const TripRoomDetail = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
   const [hasJoined, setHasJoined] = useState(false);
+  const [tripRoom, setTripRoom] = useState<TripRoom | null>(null);
 
-  const tripRoom = {
-    id: 1,
-    destination: "Goa Beach Getaway",
-    departsIn: "18 hours",
-    spotsLeft: 2,
-    totalSpots: 6,
-    budget: "₹8,000",
-    vibe: ["Beach", "Party", "Relaxing"],
-    organizer: {
-      name: "Priya K.",
-      rating: 4.8,
-      completedTrips: 12,
-      verified: true
-    },
-    expires: "Tomorrow 6 PM",
-    itinerary: [
-      "Day 1: Arrive in Goa, Check into beachside resort",
-      "Day 2: North Goa beaches - Baga, Calangute, Anjuna",
-      "Day 3: South Goa exploration - Palolem, Agonda beaches",
-      "Day 4: Adventure activities - Parasailing, Jet ski",
-      "Day 5: Departure"
-    ],
-    members: [
-      { name: "Priya K.", role: "Organizer", rating: 4.8 },
-      { name: "Amit S.", role: "Member", rating: 4.6 },
-      { name: "Neha R.", role: "Member", rating: 4.9 },
-      { name: "Rohan P.", role: "Member", rating: 4.7 }
-    ],
-    safetyFeatures: [
-      "All members verified with government ID",
-      "GPS tracking enabled during trip",
-      "Emergency contact system",
-      "24/7 support hotline"
-    ]
-  };
+  useEffect(() => {
+    if (id) {
+      const room = getTripRoom(id);
+      setTripRoom(room || null);
+    }
+  }, [id]);
 
   const handleJoinRoom = () => {
-    setHasJoined(true);
+    if (id && tripRoom) {
+      const success = joinTripRoom(id);
+      if (success) {
+        setHasJoined(true);
+        // Update the local state to reflect the change
+        setTripRoom(prev => prev ? { ...prev, spotsLeft: prev.spotsLeft - 1 } : null);
+      }
+    }
   };
+
+  if (!tripRoom) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Trip Room Not Found</h1>
+          <Link to="/flash-trip-rooms">
+            <Button>← Back to Trip Rooms</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // Generate mock members based on trip room data
+  const members = [
+    { name: tripRoom.organizer.name, role: "Organizer", rating: tripRoom.organizer.rating },
+    ...Array.from({ length: tripRoom.totalSpots - tripRoom.spotsLeft - 1 }, (_, i) => ({
+      name: `Member ${i + 1}`,
+      role: "Member",
+      rating: 4.5 + Math.random() * 0.5
+    }))
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50">
@@ -74,11 +77,11 @@ const TripRoomDetail = () => {
                   <div className="flex items-center space-x-4 text-gray-600">
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-2" />
-                      <span>Departs in {tripRoom.departsIn}</span>
+                      <span>{tripRoom.dates}</span>
                     </div>
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-2" />
-                      <span>Expires: {tripRoom.expires}</span>
+                      <span>Expires in {tripRoom.expiresIn} hours</span>
                     </div>
                   </div>
                 </div>
@@ -94,7 +97,7 @@ const TripRoomDetail = () => {
                   <div className="text-sm text-gray-600">Spots Left</div>
                 </div>
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">{tripRoom.budget}</div>
+                  <div className="text-2xl font-bold text-blue-600">₹{tripRoom.price}</div>
                   <div className="text-sm text-gray-600">Per Person</div>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
@@ -116,7 +119,7 @@ const TripRoomDetail = () => {
             <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Trip Itinerary</h2>
               <div className="space-y-3">
-                {tripRoom.itinerary.map((day, index) => (
+                {tripRoom.itinerary?.map((day, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
                       {index + 1}
@@ -134,7 +137,7 @@ const TripRoomDetail = () => {
                 Safety & Security
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {tripRoom.safetyFeatures.map((feature, index) => (
+                {tripRoom.safetyFeatures?.map((feature, index) => (
                   <div key={index} className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span className="text-gray-700">{feature}</span>
@@ -149,7 +152,7 @@ const TripRoomDetail = () => {
             {/* Join Card */}
             <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100 sticky top-6">
               <div className="text-center mb-6">
-                <div className="text-3xl font-bold text-orange-600 mb-2">{tripRoom.budget}</div>
+                <div className="text-3xl font-bold text-orange-600 mb-2">₹{tripRoom.price}</div>
                 <div className="text-gray-600">per person</div>
               </div>
 
@@ -172,7 +175,7 @@ const TripRoomDetail = () => {
                   onClick={handleJoinRoom}
                   className="w-full bg-orange-500 hover:bg-orange-600 text-lg py-3"
                 >
-                  Join Room - {tripRoom.budget}
+                  Join Room - ₹{tripRoom.price}
                 </Button>
               )}
 
@@ -191,22 +194,22 @@ const TripRoomDetail = () => {
                 <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold">
                   {tripRoom.organizer.name.split(' ').map(n => n[0]).join('')}
                 </div>
-                <div>
-                  <div className="flex items-center">
-                    <span className="font-semibold">{tripRoom.organizer.name}</span>
-                    {tripRoom.organizer.verified && (
-                      <Badge className="ml-2 bg-blue-100 text-blue-800 text-xs">
-                        Verified
-                      </Badge>
-                    )}
+                  <div>
+                    <div className="flex items-center">
+                      <span className="font-semibold">{tripRoom.organizer.name}</span>
+                      {tripRoom.organizer.verified && (
+                        <Badge className="ml-2 bg-blue-100 text-blue-800 text-xs">
+                          Verified
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center text-sm text-gray-600">
+                      <Star className="w-3 h-3 mr-1 text-yellow-500 fill-current" />
+                      <span>{tripRoom.organizer.rating} • {tripRoom.organizer.completedTrips || 0} trips</span>
+                    </div>
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Star className="w-3 h-3 mr-1 text-yellow-500 fill-current" />
-                    <span>{tripRoom.organizer.rating} • {tripRoom.organizer.completedTrips} trips</span>
-                  </div>
-                </div>
               </div>
-              <Link to={`/profile/${tripRoom.organizer.name.replace(' ', '-').toLowerCase()}`}>
+              <Link to={`/profile/${tripRoom.organizer.name.replace(/\s+/g, '-').toLowerCase()}`}>
                 <Button variant="outline" className="w-full">
                   View Profile
                 </Button>
@@ -217,7 +220,7 @@ const TripRoomDetail = () => {
             <Card className="p-6 bg-white/80 backdrop-blur-sm border-blue-100">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Current Members</h3>
               <div className="space-y-3">
-                {tripRoom.members.map((member, index) => (
+                {members.map((member, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-blue-400 rounded-full flex items-center justify-center text-white text-sm font-bold">

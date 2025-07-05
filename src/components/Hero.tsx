@@ -5,9 +5,11 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import BackgroundRemovalProcessor from "./BackgroundRemovalProcessor";
+import { useAuth } from "@/contexts/AuthContext";
 import TravellerImage from "../utils/Traveller.png";
 const Hero = () => {
   const [processedImageUrl, setProcessedImageUrl] = useState<string>("");
+  const { user, signOut, loading } = useAuth();
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50">
       {/* Navigation */}
@@ -19,16 +21,33 @@ const Hero = () => {
           </span>
         </div>
         <div className="flex items-center space-x-4">
-          <Link to="/auth">
-            <Button variant="ghost" className="text-gray-700 hover:text-orange-600">
-              Login
-            </Button>
-          </Link>
-          <Link to="/auth">
-            <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md">
-              Sign up
-            </Button>
-          </Link>
+          {!loading && (
+            user ? (
+              <>
+                <span className="text-gray-700">Welcome, {user.email}</span>
+                <Button 
+                  onClick={signOut}
+                  variant="ghost" 
+                  className="text-gray-700 hover:text-orange-600"
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <Button variant="ghost" className="text-gray-700 hover:text-orange-600">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/auth">
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-md">
+                    Sign up
+                  </Button>
+                </Link>
+              </>
+            )
+          )}
           <div className="text-sm text-gray-600 border border-gray-300 px-3 py-1 rounded-md">
             EN
           </div>

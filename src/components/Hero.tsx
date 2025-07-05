@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import BackgroundRemovalProcessor from "./BackgroundRemovalProcessor";
-
+import TravellerImage from "../utils/Traveller.png";
 const Hero = () => {
   const [processedImageUrl, setProcessedImageUrl] = useState<string>("");
   return (
@@ -81,10 +81,10 @@ const Hero = () => {
           {/* Right Image */}
           <div className="relative">
             <div className="relative">
-              <BackgroundRemovalProcessor 
+              {/* <BackgroundRemovalProcessor 
                 imageUrl="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png"
                 onProcessed={setProcessedImageUrl}
-              />
+              /> */}
               {processedImageUrl ? (
                 <img 
                   src={processedImageUrl} 
@@ -93,7 +93,7 @@ const Hero = () => {
                 />
               ) : (
                 <img 
-                  src="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png" 
+                  src={TravellerImage} 
                   alt="Happy traveler with backpack" 
                   className="w-full h-auto max-w-lg mx-auto"
                 />

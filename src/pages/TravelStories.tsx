@@ -1,55 +1,88 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Eye, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import axios from "axios";
 const TravelStories = () => {
-  const [stories, setStories] = useState([
-    {
-      id: 1,
-      author: "Sarah Chen",
-      location: "Santorini, Greece",
-      title: "Sunset Chasing in the Greek Islands",
-      content: "Just spent the most magical week island hopping in Greece. The sunsets in Oia were absolutely breathtaking! Looking for travel buddies for my next adventure to Morocco...",
-      image: "/placeholder.svg",
-      likes: 24,
-      comments: 8,
-      isLiked: false,
-      lookingFor: "Morocco Adventure Partner",
-      travelStyle: ["Photography", "Culture", "Adventure"],
-      rating: 4.9
-    },
-    {
-      id: 2,
-      author: "Raj Patel",
-      location: "Manali, India",
-      title: "Solo Trekking in the Himalayas",
-      content: "Completed the Beas Kund trek solo and it was incredible! The mountain views and solitude were exactly what I needed. Anyone interested in joining me for the Valley of Flowers trek next month?",
-      image: "/placeholder.svg",
-      likes: 18,
-      comments: 12,
-      isLiked: true,
-      lookingFor: "Valley of Flowers Trek Buddy",
-      travelStyle: ["Trekking", "Nature", "Meditation"],
-      rating: 4.8
-    },
-    {
-      id: 3,
-      author: "Emma Rodriguez",
-      location: "Kyoto, Japan",
-      title: "Cherry Blossom Magic",
-      content: "Timing was perfect for sakura season! Spent days wandering through temples and traditional gardens. The culture here is so rich. Planning a food tour through Southeast Asia next - who's in?",
-      image: "/placeholder.svg",
-      likes: 42,
-      comments: 15,
-      isLiked: false,
-      lookingFor: "Southeast Asia Food Tour",
-      travelStyle: ["Food", "Culture", "Photography"],
-      rating: 4.7
-    }
-  ]);
+  // const [stories, setStories] = useState([
+  //   {
+  //     id: 1,
+  //     author: "Sarah Chen",
+  //     location: "Santorini, Greece",
+  //     title: "Sunset Chasing in the Greek Islands",
+  //     content: "Just spent the most magical week island hopping in Greece. The sunsets in Oia were absolutely breathtaking! Looking for travel buddies for my next adventure to Morocco...",
+  //     image: "https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg?cs=srgb&dl=pexels-sagui-andrea-200115-618833.jpg&fm=jpg",
+  //     likes: 24,
+  //     comments: 8,
+  //     isLiked: false,
+  //     lookingFor: "Morocco Adventure Partner",
+  //     travelStyle: ["Photography", "Culture", "Adventure"],
+  //     rating: 4.9
+  //   },
+  //   {
+  //     id: 2,
+  //     author: "Raj Patel",
+  //     location: "Manali, India",
+  //     title: "Solo Trekking in the Himalayas",
+  //     content: "Completed the Beas Kund trek solo and it was incredible! The mountain views and solitude were exactly what I needed. Anyone interested in joining me for the Valley of Flowers trek next month?",
+  //     image: "https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg?cs=srgb&dl=pexels-sagui-andrea-200115-618833.jpg&fm=jpg",
+  //     likes: 18,
+  //     comments: 12,
+  //     isLiked: true,
+  //     lookingFor: "Valley of Flowers Trek Buddy",
+  //     travelStyle: ["Trekking", "Nature", "Meditation"],
+  //     rating: 4.8
+  //   },
+  //   {
+  //     id: 3,
+  //     author: "Emma Rodriguez",
+  //     location: "Kyoto, Japan",
+  //     title: "Cherry Blossom Magic",
+  //     content: "Timing was perfect for sakura season! Spent days wandering through temples and traditional gardens. The culture here is so rich. Planning a food tour through Southeast Asia next - who's in?",
+  //     image: "https://images.pexels.com/photos/618833/pexels-photo-618833.jpeg?cs=srgb&dl=pexels-sagui-andrea-200115-618833.jpg&fm=jpg",
+  //     likes: 42,
+  //     comments: 15,
+  //     isLiked: false,
+  //     lookingFor: "Southeast Asia Food Tour",
+  //     travelStyle: ["Food", "Culture", "Photography"],
+  //     rating: 4.7
+  //   }
+  // ]);
+  // const [stories, setStories] = useState([]);
+  // const [loading, setLoading] = useState(true);
+
+  // useEffect(() => {
+  //   fetch("http://localhost:5000/api/stories") // Adjust based on your backend URL
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setStories(data);
+  //       setLoading(false);
+  //     })
+  //     .catch((error) => {
+  //       console.error("Failed to fetch stories:", error);
+  //       setLoading(false);
+  //     });
+  // }, []);
+
+  // if (loading) return <p className="text-center mt-10">Loading stories...</p>;
+  const [stories, setStories] = useState([]);
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        console.log("Hi");
+        const res = await axios.get("http://localhost:5000/api/stories");
+        console.log("Fetched stories:", res.data);
+        setStories(res.data);
+      } catch (error) {
+        console.error("Error fetching stories:", error);
+      }
+    };
+
+    fetchStories();
+  }, []);
 
   const handleLike = (storyId: number) => {
     setStories(stories.map(story => 
@@ -112,6 +145,7 @@ const TravelStories = () => {
 
               {/* Story Content */}
               <div className="mb-4">
+                <div><img src={story.image} alt={story.title} className="w-full h-auto rounded-lg mb-4" /></div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">{story.title}</h4>
                 <p className="text-gray-700 mb-3">{story.content}</p>
                 

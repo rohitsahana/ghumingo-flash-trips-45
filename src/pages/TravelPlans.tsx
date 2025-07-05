@@ -262,6 +262,19 @@ const TravelPlans = () => (
           </Card>
         ))}
       </div>
+      {/* Travel Agent Partnership Section */}
+      <div className="mt-16 rounded-2xl bg-gradient-to-r from-orange-50 to-blue-50 p-10 flex flex-col items-center text-center">
+        <h2 className="text-2xl font-bold mb-2">Travel Agent Partnership</h2>
+        <p className="mb-6 text-lg text-gray-700 max-w-2xl">
+          Are you a travel agent? Partner with us to showcase your packages to thousands of travelers.
+        </p>
+        <button
+          className="bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-3 rounded-md text-lg transition-colors"
+          onClick={() => window.open('mailto:partners@ghumingo.com', '_blank')}
+        >
+          Become a Partner
+        </button>
+      </div>
     </div>
   </div>
 );

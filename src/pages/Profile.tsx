@@ -14,7 +14,7 @@ const Profile = () => {
     name: userId?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Travel Explorer",
     location: "Mumbai, India",
     memberSince: "January 2023",
-    rating: 4.8,
+    rating: 4000000000000000000000000,
     completedTrips: 12,
     followers: 156,
     following: 89,

@@ -10,7 +10,6 @@ import TravellerImage from "../utils/Traveller.png";
 const Hero = () => {
   const [processedImageUrl, setProcessedImageUrl] = useState<string>("");
   const { user, signOut, loading } = useAuth();
- 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50">
       {/* Navigation */}
@@ -25,7 +24,7 @@ const Hero = () => {
           {!loading && (
             user ? (
               <>
-                <span className="text-gray-700">Welcome - {user.email.split("@")[0]}</span>
+                <span className="text-gray-700">Welcome, {user.email}</span>
                 <Button 
                   onClick={signOut}
                   variant="ghost" 
@@ -49,9 +48,9 @@ const Hero = () => {
               </>
             )
           )}
-          {/* <div className="text-sm text-gray-600 border border-gray-300 px-3 py-1 rounded-md">
+          <div className="text-sm text-gray-600 border border-gray-300 px-3 py-1 rounded-md">
             EN
-          </div> */}
+          </div>
         </div>
       </nav>
 

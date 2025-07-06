@@ -120,7 +120,7 @@ const CommunityGroups = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Transportation:</span>
                     <span className="font-medium">{formatCurrency(plan.cost.breakdown.transportation)}</span>
-                    </div>
+                  </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Activities:</span>
                     <span className="font-medium">{formatCurrency(plan.cost.breakdown.activities)}</span>
@@ -359,8 +359,8 @@ const CommunityGroups = () => {
                     onClick={() => handleJoinGroup(plan.id)}
                   >
                     {joinedGroups.includes(plan.id) ? 'Leave Group' : 'Join Group'}
-                </Button>
-              </div>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -368,9 +368,9 @@ const CommunityGroups = () => {
 
         <div className="text-center">
           <Link to="/travel-plans">
-          <Button variant="outline" size="lg" className="border-orange-300 text-orange-700 hover:bg-orange-50">
+            <Button variant="outline" size="lg" className="border-orange-300 text-orange-700 hover:bg-orange-50">
               View All Travel Plans
-          </Button>
+            </Button>
           </Link>
         </div>
       </div>

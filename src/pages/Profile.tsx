@@ -10,7 +10,7 @@ const Profile = () => {
   // const { userId } = useParams();
   const [isFollowing, setIsFollowing] = useState(false);
 
-  // const profile = {
+ 
   //   name: userId?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Travel Explorer",
   //   location: "Mumbai, India",
   //   memberSince: "January 2023",

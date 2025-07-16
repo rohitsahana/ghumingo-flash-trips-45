@@ -14,6 +14,7 @@ import Messaging from "./pages/Messaging";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import TravelPlans from "./pages/TravelPlans";
+import TripRoomForm from "./components/ui/tripRoomForm";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/messaging/:userId" element={<Messaging />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/travel-plans" element={<TravelPlans />} />
+             <Route path="/flash-trip-rooms/new" element={<TripRoomForm />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

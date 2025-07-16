@@ -15,7 +15,11 @@ mongoose.connect("mongodb+srv://Preet:dejavu@preetsingh.a0rfk.mongodb.net/")
 
 import storyRoutes from './routes/stories.js';
 import profileRoutes from './routes/profile.js' // Adjust the path as necessary
+import tripRoomRoutes from './routes/tripRooms.js'; // Adjust the path as necessary
+import a from './routes/travelPosts.js'; // Adjust the path as necessary
 app.use('/api/stories', storyRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/triprooms', tripRoomRoutes);
+app.use('/api/travelposts', a);
 const PORT =  5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

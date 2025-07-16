@@ -25,19 +25,8 @@ interface TripRoomProps {
   price: number;
 }
 
-const TripRoom = ({ 
-  id,
-  destination, 
-  dates, 
-  budget, 
-  spotsLeft, 
-  totalSpots, 
-  organizer, 
-  vibe, 
-  expiresIn,
-  price 
-}: TripRoomProps) => {
-  const [timeLeft, setTimeLeft] = useState(expiresIn * 3600); // Convert hours to seconds
+const TripRoom = (room) => {
+  const [timeLeft, setTimeLeft] = useState(room.expiresIn * 3600); // Convert hours to seconds
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,7 +43,7 @@ const TripRoom = ({
     return `${hours}h ${minutes}m ${secs}s`;
   };
 
-  const urgencyColor = spotsLeft <= 2 ? "text-red-600" : spotsLeft <= 5 ? "text-orange-600" : "text-green-600";
+  const urgencyColor = room.spotsLeft <= 2 ? "text-red-600" : room.spotsLeft <= 5 ? "text-orange-600" : "text-green-600";
 
   return (
     <Card className="p-6 hover:shadow-xl transition-all duration-300 border-l-4 border-l-orange-500 bg-gradient-to-br from-white to-orange-50/30">
@@ -65,11 +54,11 @@ const TripRoom = ({
             ⚡ {formatTime(timeLeft)} left
           </Badge>
           <Badge className={`${urgencyColor} bg-white border`}>
-            {spotsLeft} spots left
+            {room.spotsLeft} spots left
           </Badge>
         </div>
         <div className="text-right">
-          <div className="text-2xl font-bold text-orange-600">₹{price}</div>
+          <div className="text-2xl font-bold text-orange-600">₹{room.price}</div>
           <div className="text-sm text-gray-500">per person</div>
         </div>
       </div>
@@ -78,31 +67,31 @@ const TripRoom = ({
       <div className="mb-4">
         <h3 className="text-2xl font-bold text-gray-800 mb-2 flex items-center">
           <MapPin className="w-5 h-5 text-orange-500 mr-2" />
-          {destination}
+          {room.destination}
         </h3>
         <div className="flex items-center text-gray-600 mb-2">
           <Clock className="w-4 h-4 mr-2" />
-          {dates}
+          {room.dates}
         </div>
-        <div className="text-gray-600">Budget: {budget}</div>
+        <div className="text-gray-600">Budget: {room.budget}</div>
       </div>
 
       {/* Organizer */}
       <div className="flex items-center space-x-3 mb-4">
         <Avatar>
-          <AvatarImage src={organizer.avatar} />
-          <AvatarFallback>{organizer.name[0]}</AvatarFallback>
+          <AvatarImage src={room.organizer.avatar} />
+          <AvatarFallback>{room.organizer.name[0]}</AvatarFallback>
         </Avatar>
         <div>
           <div className="flex items-center space-x-2">
-            <span className="font-semibold">{organizer.name}</span>
-            {organizer.verified && (
+            <span className="font-semibold">{room.organizer.name}</span>
+            {room.organizer.verified && (
               <Badge className="bg-green-100 text-green-800 text-xs">✓ Verified</Badge>
             )}
           </div>
           <div className="flex items-center space-x-1">
             <Star className="w-4 h-4 text-yellow-500 fill-current" />
-            <span className="text-sm text-gray-600">{organizer.rating}</span>
+            <span className="text-sm text-gray-600">{room.organizer.rating}</span>
           </div>
         </div>
       </div>
@@ -110,7 +99,7 @@ const TripRoom = ({
       {/* Vibe tags */}
       <div className="mb-4">
         <div className="flex flex-wrap gap-2">
-          {vibe.map((tag, index) => (
+          {room.vibe.map((tag, index) => (
             <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800">
               {tag}
             </Badge>
@@ -122,23 +111,23 @@ const TripRoom = ({
       <div className="mb-4">
         <div className="flex justify-between text-sm text-gray-600 mb-1">
           <span>Seats filled</span>
-          <span>{totalSpots - spotsLeft}/{totalSpots}</span>
+          <span>{room.totalSpots - room.spotsLeft}/{room.totalSpots}</span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2">
           <div 
             className="bg-gradient-to-r from-orange-500 to-blue-500 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((totalSpots - spotsLeft) / totalSpots) * 100}%` }}
+            style={{ width: `${((room.totalSpots - room.spotsLeft) / room.totalSpots) * 100}%` }}
           ></div>
         </div>
       </div>
 
       {/* Action button */}
-      <Link to={`/trip-room/${id}`}>
+      <Link to={`/trip-room/${room.id}`}>
         <Button 
           className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
-          disabled={spotsLeft === 0}
+          disabled={room.spotsLeft === 0}
         >
-          {spotsLeft === 0 ? "Trip Full" : `Join Trip (${spotsLeft} spots left)`}
+          {room.spotsLeft === 0 ? "Trip Full" : `Join Trip (${room.spotsLeft} spots left)`}
         </Button>
       </Link>
     </Card>

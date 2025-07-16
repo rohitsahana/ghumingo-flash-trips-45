@@ -1,10 +1,25 @@
 
 import TripRoom from "./TripRoom";
-import { Link } from "react-router-dom";
-import { getAllTripRooms } from "@/data/tripRooms";
+import { useEffect, useState } from "react";
 
 const TripRoomsFeed = () => {
-  const tripRooms = getAllTripRooms();
+
+const [tripRooms, setTripRooms] = useState(null);
+const [loading, setIsLoading] = useState(true);
+
+useEffect(() => {
+  const fetchRooms = async () => {
+    const res = await fetch("http://localhost:5000/api/triprooms/");
+    const data = await res.json();
+    console.log("Fetched trip rooms:", data,res);
+    setTripRooms(data);
+  };
+  setIsLoading(false);
+  fetchRooms();
+}, []);
+if (loading || !tripRooms) {
+  return <div className="p-6 text-center">Loading profile... Profile</div>;
+}
 
   return (
     <div className="py-16 bg-gradient-to-b from-white to-orange-50/30">
@@ -19,8 +34,10 @@ const TripRoomsFeed = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-          {tripRooms.map((room, index) => (
-            <TripRoom key={index} {...room} />
+          {tripRooms.slice(0, 3).map((room, index) => (
+            // <div>{room.price}</div>
+            // <div>Hi</div>
+            <TripRoom {...room} />
           ))}
         </div>
 

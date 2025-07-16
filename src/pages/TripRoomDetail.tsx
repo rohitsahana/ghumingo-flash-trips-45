@@ -9,14 +9,24 @@ import { getTripRoom, joinTripRoom, type TripRoom } from "@/data/tripRooms";
 const TripRoomDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [hasJoined, setHasJoined] = useState(false);
-  const [tripRoom, setTripRoom] = useState<TripRoom | null>(null);
+  // const [tripRoom, setTripRoom] = useState<TripRoom | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      const room = getTripRoom(id);
-      setTripRoom(room || null);
-    }
-  }, [id]);
+ const [tripRoom, setTripRoom] = useState(null);
+const [loading, setIsLoading] = useState(true);
+// console.log("Trip Rooms:", tripRooms);
+useEffect(() => {
+  const fetchRooms = async () => {
+    const res = await fetch(`http://localhost:5000/api/triprooms/${id}`);
+    const data = await res.json();
+    console.log("Fetched trip rooms:", data,res);
+    setTripRoom(data);
+  };
+  setIsLoading(false);
+  fetchRooms();
+}, []);
+if (loading || !tripRoom) {
+  return <div className="p-6 text-center">Loading profile... Profile</div>;
+}
 
   const handleJoinRoom = () => {
     if (id && tripRoom) {

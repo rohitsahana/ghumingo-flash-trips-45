@@ -6,55 +6,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Heart, MessageSquare, MapPin, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 
-interface TravelPostProps {
-  author: {
-    name: string;
-    avatar: string;
-    verified: boolean;
-    location: string;
-  };
-  content: string;
-  image: string;
-  destination: string;
-  travelDate: string;
-  likes: number;
-  comments: number;
-  tags: string[];
-}
 
-const TravelPost = ({
-  author,
-  content,
-  image,
-  destination,
-  travelDate,
-  likes,
-  comments,
-  tags
-}: TravelPostProps) => {
+
+const TravelPost = (posts) => {
+  // console.log("TravelPost component received posts:", posts,posts.author);
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Author header */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <Avatar>
-            <AvatarImage src={author.avatar} />
-            <AvatarFallback>{author.name[0]}</AvatarFallback>
+            <AvatarImage src={posts.author.avatar} />
+            <AvatarFallback>{posts.author.name}</AvatarFallback>
           </Avatar>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-semibold">{author.name}</span>
-              {author.verified && (
+              <span className="font-semibold">{posts.author.name}</span>
+              {posts.author.verified && (
                 <Badge className="bg-green-100 text-green-800 text-xs">✓ Verified</Badge>
               )}
             </div>
             <div className="text-sm text-gray-500 flex items-center">
               <MapPin className="w-3 h-3 mr-1" />
-              {author.location}
+              {posts.author.location}
             </div>
           </div>
         </div>
-        <Link to={`/messaging/${author.name.replace(' ', '-').toLowerCase()}`}>
+        <Link to={`/messaging/${posts.author.name}`}>
           <Button variant="outline" size="sm" className="text-orange-600 border-orange-300 hover:bg-orange-50">
             Connect
           </Button>
@@ -64,30 +42,30 @@ const TravelPost = ({
       {/* Travel image */}
       <div className="relative">
         <img 
-          src={image} 
-          alt={destination}
+          src={posts.image} 
+          alt={posts.destination}
           className="w-full h-64 object-cover"
         />
         <div className="absolute top-4 left-4">
           <Badge className="bg-white/90 text-gray-800">
             <MapPin className="w-3 h-3 mr-1" />
-            {destination}
+            {posts.destination}
           </Badge>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-4">
-        <p className="text-gray-800 mb-3">{content}</p>
+        <p className="text-gray-800 mb-3">{posts.content}</p>
         
         <div className="flex items-center text-sm text-gray-600 mb-3">
           <Calendar className="w-4 h-4 mr-1" />
-          Travel Date: {travelDate}
+          Travel Date: {posts.travelDate}
         </div>
 
         {/* Tags */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {tags.map((tag, index) => (
+          {posts.tags.map((tag, index) => (
             <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
               #{tag}
             </Badge>
@@ -99,11 +77,11 @@ const TravelPost = ({
           <div className="flex items-center space-x-4">
             <Button variant="ghost" size="sm" className="text-gray-600 hover:text-red-500">
               <Heart className="w-4 h-4 mr-1" />
-              {likes}
+              {posts.likes}
             </Button>
             <Button variant="ghost" size="sm" className="text-gray-600 hover:text-blue-500">
               <MessageSquare className="w-4 h-4 mr-1" />
-              {comments}
+              {posts.comments}
             </Button>
           </div>
           <Link to="/communities">

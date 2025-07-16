@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,44 +6,23 @@ import { Clock, Users, MapPin, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const FlashTripRooms = () => {
-  const [tripRooms] = useState([
-    {
-      id: 1,
-      destination: "Goa Beach Getaway",
-      departsIn: "18 hours",
-      spotsLeft: 2,
-      totalSpots: 6,
-      budget: "₹8,000",
-      vibe: ["Beach", "Party", "Relaxing"],
-      organizer: "Priya K.",
-      rating: 4.8,
-      expires: "Tomorrow 6 PM"
-    },
-    {
-      id: 2,
-      destination: "Himalayan Trek",
-      departsIn: "6 hours",
-      spotsLeft: 1,
-      totalSpots: 4,
-      budget: "₹12,000",
-      vibe: ["Adventure", "Nature", "Photography"],
-      organizer: "Arjun M.",
-      rating: 4.9,
-      expires: "Today 11 PM"
-    },
-    {
-      id: 3,
-      destination: "Rajasthan Cultural Tour",
-      departsIn: "2 days",
-      spotsLeft: 4,
-      totalSpots: 8,
-      budget: "₹15,000",
-      vibe: ["Culture", "History", "Food"],
-      organizer: "Kavya S.",
-      rating: 4.7,
-      expires: "Friday 8 AM"
-    }
-  ]);
+const [tripRooms, setTripRooms] = useState(null);
+const [loading, setIsLoading] = useState(true);
+
+useEffect(() => {
+  const fetchRooms = async () => {
+    const res = await fetch("http://localhost:5000/api/triprooms/");
+    const data = await res.json();
+    console.log("Fetched trip rooms:", data,res);
+    setTripRooms(data);
+  };
+  setIsLoading(false);
+  fetchRooms();
+}, []);
+if (loading || !tripRooms) {
+  return <div className="p-6 text-center">Loading profile... Profile</div>;
+}
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50">
@@ -72,12 +51,12 @@ const FlashTripRooms = () => {
         {/* Trip Rooms Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {tripRooms.map((room) => (
-            <Card key={room.id} className="p-6 bg-white/70 backdrop-blur-sm border-orange-100 hover:shadow-lg transition-all hover:scale-105">
+            <Card key={room._id} className="p-6 bg-white/70 backdrop-blur-sm border-orange-100 hover:shadow-lg transition-all hover:scale-105">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-bold text-gray-900">{room.destination}</h3>
                 <Badge variant="destructive" className="bg-red-100 text-red-800">
                   <Clock className="w-3 h-3 mr-1" />
-                  {room.departsIn}
+                  {room.expiresIn} hours left
                 </Badge>
               </div>
 
@@ -106,11 +85,11 @@ const FlashTripRooms = () => {
                 <div className="flex justify-between items-center mb-3">
                   <div>
                     <p className="text-sm text-gray-600">Organized by</p>
-                    <p className="font-semibold">{room.organizer}</p>
+                    <p className="font-semibold">{room.organizer.name}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-gray-600">Rating</p>
-                    <p className="font-semibold text-green-600">⭐ {room.rating}</p>
+                    <p className="font-semibold text-green-600">⭐ {room.organizer.rating}</p>
                   </div>
                 </div>
 
@@ -124,10 +103,11 @@ const FlashTripRooms = () => {
                 </div>
 
                 <p className="text-xs text-red-600 mt-2 text-center">
-                  Expires: {room.expires}
+                  Expires: {room.expiresIn} hours
                 </p>
               </div>
             </Card>
+            // <div>{room.id}</div>
           ))}
         </div>
 
@@ -139,7 +119,7 @@ const FlashTripRooms = () => {
           <p className="text-gray-600 mb-6">
             Have a spontaneous trip idea? Create a room and find travel buddies instantly!
           </p>
-          <Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white px-8">
+          <Button size="lg" className="bg-blue-500 hover:bg-blue-600 text-white px-8" onClick={() => window.location.href = "/flash-trip-rooms/new"}>
             Create Trip Room
           </Button>
         </Card>

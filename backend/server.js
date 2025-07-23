@@ -1,29 +1,24 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const TravelPlan = require('./models/TravelPlan');
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected!'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect("mongodb+srv://Preet:dejavu@preetsingh.a0rfk.mongodb.net/")
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('Mongo error:', err));
 
-// Get all travel plans
-app.get('/api/travel-plans', async (req, res) => {
-  const plans = await TravelPlan.find();
-  res.json(plans);
-});
-
-// Add a new travel plan
-app.post('/api/travel-plans', async (req, res) => {
-  const plan = new TravelPlan(req.body);
-  await plan.save();
-  res.status(201).json(plan);
-});
-
-const PORT = process.env.PORT || 4000;
+import storyRoutes from './routes/stories.js';
+import profileRoutes from './routes/profile.js' // Adjust the path as necessary
+import tripRoomRoutes from './routes/tripRooms.js'; // Adjust the path as necessary
+import a from './routes/travelPosts.js'; // Adjust the path as necessary
+app.use('/api/stories', storyRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/triprooms', tripRoomRoutes);
+app.use('/api/travelposts', a);
+const PORT =  5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 

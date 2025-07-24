@@ -11,73 +11,7 @@ const Profile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
 
  
-  //   name: userId?.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()) || "Travel Explorer",
-  //   location: "Mumbai, India",
-  //   memberSince: "January 2023",
-  //   rating: 4.8,
-  //   completedTrips: 12,
-  //   followers: 156,
-  //   following: 89,
-  //   verified: true,
-  //   bio: "Passionate traveler who believes in authentic experiences and meaningful connections. Love exploring off-the-beaten-path destinations and immersing in local cultures.",
-  //   travelStyle: ["Adventure", "Culture", "Photography", "Solo Travel"],
-  //   languages: ["English", "Hindi", "Spanish"],
-  //   interests: ["Hiking", "Street Photography", "Local Cuisine", "Art"],
-  //   pastTrips: [
-  //     {
-  //       destination: "Ladakh, India",
-  //       date: "June 2024",
-  //       duration: "10 days",
-  //       rating: 5,
-  //       review: "Absolutely breathtaking! The landscapes were incredible and the local people were so welcoming."
-  //     },
-  //     {
-  //       destination: "Vietnam & Cambodia",
-  //       date: "March 2024",
-  //       duration: "14 days",
-  //       rating: 5,
-  //       review: "Amazing cultural experience. Street food was outstanding and temples were magnificent."
-  //     },
-  //     {
-  //       destination: "Rajasthan, India",
-  //       date: "December 2023",
-  //       duration: "8 days",
-  //       rating: 4,
-  //       review: "Beautiful palaces and rich culture. Highly recommend for first-time visitors to India."
-  //     }
-  //   ],
-  //   reviews: [
-  //     {
-  //       reviewer: "Amit Sharma",
-  //       rating: 5,
-  //       comment: "Great travel companion! Very organized and fun to be around. Highly recommend traveling with them.",
-  //       trip: "Goa Beach Trip",
-  //       date: "May 2024"
-  //     },
-  //     {
-  //       reviewer: "Sarah Johnson",
-  //       rating: 5,
-  //       comment: "Excellent photographer and very knowledgeable about local culture. Made our trip memorable!",
-  //       trip: "Kerala Backwaters",
-  //       date: "February 2024"
-  //     },
-  //     {
-  //       reviewer: "Rohan Patel",
-  //       rating: 4,
-  //       comment: "Reliable and punctual. Good at planning itineraries. Would travel again!",
-  //       trip: "Himachal Trek",
-  //       date: "October 2023"
-  //     }
-  //   ],
-  //   safetyBadges: ["ID Verified", "Phone Verified", "Email Verified", "Background Check"],
-  //   upcomingTrips: [
-  //     {
-  //       destination: "Nepal Trek",
-  //       date: "August 2024",
-  //       lookingFor: "2 more travelers"
-  //     }
-  //   ]
-  // };
+  
 const [profile, setProfile] = useState(null);
 const [loading, setLoading] = useState(true);
 const { userId } = useParams();
@@ -88,9 +22,9 @@ useEffect(() => {
       const response = await fetch(`http://localhost:5000/api/profile/`);
       const data = await response.json();
       setProfile(data);
-      console.log("Fetched profile:", data);
     } catch (error) {
       console.error("Failed to fetch profile:", error);
+      
     } finally {
       setLoading(false);
     }

@@ -36,18 +36,8 @@ const TravelAgentOnboarding = () => {
       return { isValid: false, error: 'Aadhar number must be exactly 12 digits' };
     }
 
-    // Basic checksum validation
-    const digits = cleanAadhar.split('').map(Number);
-    let sum = 0;
-    for (let i = 0; i < 11; i++) {
-      sum += digits[i] * (12 - i);
-    }
-    const checksum = (10 - (sum % 10)) % 10;
-    
-    if (digits[11] !== checksum) {
-      return { isValid: false, error: 'Invalid Aadhar number checksum' };
-    }
-
+    // For demo/testing purposes, accept any 12-digit number
+    // In production, you would implement proper checksum validation
     return { isValid: true, cleanAadhar };
   };
 

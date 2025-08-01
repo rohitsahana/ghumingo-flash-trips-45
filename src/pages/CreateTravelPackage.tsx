@@ -6,544 +6,632 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Minus, Save, ArrowLeft } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Plus, X, Upload } from 'lucide-react';
 
 const CreateTravelPackage = () => {
   const navigate = useNavigate();
-  const [packageData, setPackageData] = useState({
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
     title: '',
+    description: '',
     destination: '',
     duration: '',
-    description: '',
-    highlights: [''],
-    requirements: [''],
-    included: [''],
-    notIncluded: [''],
-    image: '',
-    tags: '',
     cost: {
-      total: 0,
-      breakdown: {
-        accommodation: 0,
-        transportation: 0,
-        activities: 0,
-        meals: 0,
-        misc: 0
-      }
+      amount: '',
+      currency: 'INR'
     },
-    contact: {
-      organizer: '',
-      phone: '',
-      email: '',
-      whatsapp: ''
-    },
-    groupSize: {
-      current: 0,
-      max: 0
-    },
-    startDate: '',
-    endDate: ''
+    maxTravelers: 20,
+    itinerary: [{ day: '', activities: [''] }],
+    inclusions: [''],
+    exclusions: [''],
+    highlights: [''],
+    images: [''],
+    tags: ['']
   });
 
-  const [itinerary, setItinerary] = useState([
-    { day: 1, title: '', activities: [''], accommodation: '', meals: [''] }
-  ]);
-
-  const [hotels, setHotels] = useState([
-    { name: '', rating: 0, price: 0, amenities: [''], contact: '', address: '' }
-  ]);
+  // Mock user email - in real app, get from auth context
+  const userEmail = 'rohit.sahana2@gmail.com';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      if (parent === 'cost' && child === 'total') {
-        setPackageData(prev => ({
-          ...prev,
-          cost: { ...prev.cost, total: Number(value) }
-        }));
-      } else if (parent === 'cost' && child.startsWith('breakdown.')) {
-        const breakdownField = child.replace('breakdown.', '');
-        setPackageData(prev => ({
-          ...prev,
-          cost: {
-            ...prev.cost,
-            breakdown: { ...prev.cost.breakdown, [breakdownField]: Number(value) }
-          }
-        }));
-      } else if (parent === 'contact') {
-        setPackageData(prev => ({
-          ...prev,
-          contact: { ...prev.contact, [child]: value }
-        }));
-      } else if (parent === 'groupSize') {
-        setPackageData(prev => ({
-          ...prev,
-          groupSize: { ...prev.groupSize, [child]: Number(value) }
-        }));
-      }
-    } else {
-      setPackageData(prev => ({
+      setFormData(prev => ({
         ...prev,
-        [name]: name === 'cost' ? Number(value) : value
+        [parent]: {
+          ...prev[parent as keyof typeof prev],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
       }));
     }
   };
 
-  const handleArrayChange = (field: keyof Pick<typeof packageData, 'highlights' | 'requirements' | 'included' | 'notIncluded'>, index: number, value: string) => {
-    setPackageData(prev => ({
+  const handleArrayChange = (field: string, index: number, value: string) => {
+    setFormData(prev => ({
       ...prev,
-      [field]: (prev[field] as string[]).map((item: string, i: number) => 
+      [field]: prev[field as keyof typeof prev].map((item: any, i: number) => 
         i === index ? value : item
       )
     }));
   };
 
-  const addArrayItem = (field: keyof Pick<typeof packageData, 'highlights' | 'requirements' | 'included' | 'notIncluded'>) => {
-    setPackageData(prev => ({
+  const addArrayItem = (field: string) => {
+    setFormData(prev => ({
       ...prev,
-      [field]: [...(prev[field] as string[]), '']
+      [field]: [...prev[field as keyof typeof prev], '']
     }));
   };
 
-  const removeArrayItem = (field: keyof Pick<typeof packageData, 'highlights' | 'requirements' | 'included' | 'notIncluded'>, index: number) => {
-    setPackageData(prev => ({
+  const removeArrayItem = (field: string, index: number) => {
+    setFormData(prev => ({
       ...prev,
-      [field]: (prev[field] as string[]).filter((_: any, i: number) => i !== index)
+      [field]: prev[field as keyof typeof prev].filter((_: any, i: number) => i !== index)
     }));
   };
 
   const addItineraryDay = () => {
-    setItinerary(prev => [...prev, {
-      day: prev.length + 1,
-      title: '',
-      activities: [''],
-      accommodation: '',
-      meals: ['']
-    }]);
+    setFormData(prev => ({
+      ...prev,
+      itinerary: [...prev.itinerary, { day: '', activities: [''] }]
+    }));
   };
 
-  const addHotel = () => {
-    setHotels(prev => [...prev, {
-      name: '',
-      rating: 0,
-      price: 0,
-      amenities: [''],
-      contact: '',
-      address: ''
-    }]);
+  const removeItineraryDay = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      itinerary: prev.itinerary.filter((_, i) => i !== index)
+    }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleItineraryChange = (dayIndex: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      itinerary: prev.itinerary.map((day, i) => 
+        i === dayIndex ? { ...day, [field]: value } : day
+      )
+    }));
+  };
+
+  const addActivity = (dayIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      itinerary: prev.itinerary.map((day, i) => 
+        i === dayIndex ? { ...day, activities: [...day.activities, ''] } : day
+      )
+    }));
+  };
+
+  const removeActivity = (dayIndex: number, activityIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      itinerary: prev.itinerary.map((day, i) => 
+        i === dayIndex ? { 
+          ...day, 
+          activities: day.activities.filter((_, ai) => ai !== activityIndex) 
+        } : day
+      )
+    }));
+  };
+
+  const handleActivityChange = (dayIndex: number, activityIndex: number, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      itinerary: prev.itinerary.map((day, i) => 
+        i === dayIndex ? {
+          ...day,
+          activities: day.activities.map((activity, ai) => 
+            ai === activityIndex ? value : activity
+          )
+        } : day
+      )
+    }));
+  };
+
+  const validateForm = () => {
+    if (!formData.title.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a package title",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.description.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a package description",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.destination.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a destination",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.duration.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter the duration",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.cost.amount || parseFloat(formData.cost.amount) <= 0) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter a valid cost amount",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalData = {
-      ...packageData,
-      itinerary,
-      hotels,
-      tags: packageData.tags.split(',').map(tag => tag.trim()),
-      id: `package-${Date.now()}`
-    };
-    console.log('New travel package:', finalData);
-    navigate('/travel-agent/dashboard');
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const submitData = {
+        ...formData,
+        cost: {
+          amount: parseFloat(formData.cost.amount),
+          currency: formData.cost.currency
+        },
+        maxTravelers: parseInt(formData.maxTravelers.toString()),
+        travelAgentId: userEmail,
+        travelAgentName: 'Travel Agent', // In real app, get from user profile
+        inclusions: formData.inclusions.filter(item => item.trim()),
+        exclusions: formData.exclusions.filter(item => item.trim()),
+        highlights: formData.highlights.filter(item => item.trim()),
+        images: formData.images.filter(item => item.trim()),
+        tags: formData.tags.filter(item => item.trim()),
+        itinerary: formData.itinerary.map(day => ({
+          day: day.day,
+          activities: day.activities.filter(activity => activity.trim())
+        })).filter(day => day.day.trim() && day.activities.length > 0)
+      };
+
+      const response = await fetch('http://localhost:6080/api/travel-agents/travel-plans', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(submitData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Success!",
+          description: "Travel package created successfully",
+        });
+        navigate('/travel-agent/dashboard');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create travel package');
+      }
+    } catch (error) {
+      toast({
+        title: "Creation Failed",
+        description: error instanceof Error ? error.message : "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/travel-agent/dashboard')}
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Create Travel Package</h1>
-              <p className="text-gray-600">Design your perfect travel experience</p>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Travel Package</h1>
+          <p className="text-gray-600">Design and publish your travel package for customers to book</p>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
         <form onSubmit={handleSubmit}>
-          <Tabs defaultValue="basic" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="basic">Basic Info</TabsTrigger>
-              <TabsTrigger value="pricing">Pricing</TabsTrigger>
-              <TabsTrigger value="itinerary">Itinerary</TabsTrigger>
-              <TabsTrigger value="hotels">Hotels</TabsTrigger>
-              <TabsTrigger value="details">Details</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="basic">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
-                  <CardDescription>Enter the basic details of your travel package</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="title">Package Title *</Label>
-                      <Input
-                        id="title"
-                        name="title"
-                        value={packageData.title}
-                        onChange={handleInputChange}
-                        placeholder="e.g., Rajasthan Royal Heritage Tour"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="destination">Destination *</Label>
-                      <Input
-                        id="destination"
-                        name="destination"
-                        value={packageData.destination}
-                        onChange={handleInputChange}
-                        placeholder="e.g., Rajasthan, India"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="duration">Duration *</Label>
-                      <Input
-                        id="duration"
-                        name="duration"
-                        value={packageData.duration}
-                        onChange={handleInputChange}
-                        placeholder="e.g., 7 Days / 6 Nights"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="image">Package Image URL</Label>
-                      <Input
-                        id="image"
-                        name="image"
-                        value={packageData.image}
-                        onChange={handleInputChange}
-                        placeholder="https://example.com/image.jpg"
-                      />
-                    </div>
-                  </div>
-
+          <div className="space-y-6">
+            {/* Basic Information */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Basic Information</CardTitle>
+                <CardDescription>Essential details about your travel package</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="title">Package Title *</Label>
+                  <Input
+                    id="title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Rajasthan Royal Heritage Tour"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description *</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleInputChange}
+                    placeholder="Describe your travel package in detail..."
+                    rows={4}
+                    required
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="description">Description *</Label>
-                    <Textarea
-                      id="description"
-                      name="description"
-                      value={packageData.description}
+                    <Label htmlFor="destination">Destination *</Label>
+                    <Input
+                      id="destination"
+                      name="destination"
+                      value={formData.destination}
                       onChange={handleInputChange}
-                      placeholder="Describe your travel package..."
-                      rows={4}
+                      placeholder="e.g., Rajasthan, India"
                       required
                     />
                   </div>
-
                   <div>
-                    <Label htmlFor="tags">Tags (comma-separated)</Label>
+                    <Label htmlFor="duration">Duration *</Label>
                     <Input
-                      id="tags"
-                      name="tags"
-                      value={packageData.tags}
+                      id="duration"
+                      name="duration"
+                      value={formData.duration}
                       onChange={handleInputChange}
-                      placeholder="Adventure, Culture, Heritage, Luxury"
+                      placeholder="e.g., 7 Days / 6 Nights"
+                      required
                     />
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                      <Label htmlFor="startDate">Start Date</Label>
-                      <Input
-                        id="startDate"
-                        name="startDate"
-                        type="date"
-                        value={packageData.startDate}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="endDate">End Date</Label>
-                      <Input
-                        id="endDate"
-                        name="endDate"
-                        type="date"
-                        value={packageData.endDate}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="groupSize.max">Max Group Size</Label>
-                      <Input
-                        id="groupSize.max"
-                        name="groupSize.max"
-                        type="number"
-                        value={packageData.groupSize.max}
-                        onChange={handleInputChange}
-                        placeholder="15"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="pricing">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pricing Details</CardTitle>
-                  <CardDescription>Set your package pricing and cost breakdown</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="cost.total">Total Package Price (₹) *</Label>
+                    <Label htmlFor="cost.amount">Cost (₹) *</Label>
                     <Input
-                      id="cost.total"
-                      name="cost.total"
+                      id="cost.amount"
+                      name="cost.amount"
                       type="number"
-                      value={packageData.cost.total}
+                      value={formData.cost.amount}
                       onChange={handleInputChange}
-                      placeholder="46080"
+                      placeholder="25000"
+                      min="0"
                       required
                     />
                   </div>
-
                   <div>
-                    <Label className="text-lg font-semibold">Cost Breakdown</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                    <Label htmlFor="maxTravelers">Max Travelers</Label>
+                    <Input
+                      id="maxTravelers"
+                      name="maxTravelers"
+                      type="number"
+                      value={formData.maxTravelers}
+                      onChange={handleInputChange}
+                      placeholder="20"
+                      min="1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="cost.currency">Currency</Label>
+                    <Input
+                      id="cost.currency"
+                      name="cost.currency"
+                      value={formData.cost.currency}
+                      onChange={handleInputChange}
+                      placeholder="INR"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Itinerary */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Itinerary</CardTitle>
+                <CardDescription>Day-wise breakdown of activities</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {formData.itinerary.map((day, dayIndex) => (
+                  <div key={dayIndex} className="border rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-semibold">Day {dayIndex + 1}</h4>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeItineraryDay(dayIndex)}
+                        className="text-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="space-y-3">
                       <div>
-                        <Label htmlFor="cost.breakdown.accommodation">Accommodation (₹)</Label>
+                        <Label>Day Title</Label>
                         <Input
-                          id="cost.breakdown.accommodation"
-                          name="cost.breakdown.accommodation"
-                          type="number"
-                          value={packageData.cost.breakdown.accommodation}
-                          onChange={handleInputChange}
+                          value={day.day}
+                          onChange={(e) => handleItineraryChange(dayIndex, 'day', e.target.value)}
+                          placeholder="e.g., Arrival and City Tour"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="cost.breakdown.transportation">Transportation (₹)</Label>
-                        <Input
-                          id="cost.breakdown.transportation"
-                          name="cost.breakdown.transportation"
-                          type="number"
-                          value={packageData.cost.breakdown.transportation}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cost.breakdown.activities">Activities (₹)</Label>
-                        <Input
-                          id="cost.breakdown.activities"
-                          name="cost.breakdown.activities"
-                          type="number"
-                          value={packageData.cost.breakdown.activities}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cost.breakdown.meals">Meals (₹)</Label>
-                        <Input
-                          id="cost.breakdown.meals"
-                          name="cost.breakdown.meals"
-                          type="number"
-                          value={packageData.cost.breakdown.meals}
-                          onChange={handleInputChange}
-                        />
+                        <Label>Activities</Label>
+                        {day.activities.map((activity, activityIndex) => (
+                          <div key={activityIndex} className="flex gap-2 mt-2">
+                            <Input
+                              value={activity}
+                              onChange={(e) => handleActivityChange(dayIndex, activityIndex, e.target.value)}
+                              placeholder="e.g., Airport pickup, hotel check-in"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => removeActivity(dayIndex, activityIndex)}
+                              className="text-red-600"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => addActivity(dayIndex)}
+                          className="mt-2"
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Add Activity
+                        </Button>
                       </div>
                     </div>
                   </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addItineraryDay}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Day
+                </Button>
+              </CardContent>
+            </Card>
 
-                  <div>
-                    <Label className="text-lg font-semibold">Contact Information</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                      <div>
-                        <Label htmlFor="contact.organizer">Organizer Name *</Label>
-                        <Input
-                          id="contact.organizer"
-                          name="contact.organizer"
-                          value={packageData.contact.organizer}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="contact.phone">Phone Number *</Label>
-                        <Input
-                          id="contact.phone"
-                          name="contact.phone"
-                          value={packageData.contact.phone}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="contact.email">Email *</Label>
-                        <Input
-                          id="contact.email"
-                          name="contact.email"
-                          type="email"
-                          value={packageData.contact.email}
-                          onChange={handleInputChange}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="contact.whatsapp">WhatsApp</Label>
-                        <Input
-                          id="contact.whatsapp"
-                          name="contact.whatsapp"
-                          value={packageData.contact.whatsapp}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="details">
+            {/* Inclusions & Exclusions */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Package Details</CardTitle>
-                  <CardDescription>Add highlights, requirements, and inclusions</CardDescription>
+                  <CardTitle>Inclusions</CardTitle>
+                  <CardDescription>What's included in the package</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Highlights */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label>Package Highlights</Label>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addArrayItem('highlights')}>
-                        <Plus className="w-4 h-4" />
+                <CardContent className="space-y-3">
+                  {formData.inclusions.map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => handleArrayChange('inclusions', index, e.target.value)}
+                        placeholder="e.g., Hotel accommodation"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeArrayItem('inclusions', index)}
+                        className="text-red-600"
+                      >
+                        <X className="w-4 h-4" />
                       </Button>
                     </div>
-                    {packageData.highlights.map((highlight, index) => (
-                      <div key={index} className="flex items-center gap-2 mb-2">
-                        <Input
-                          value={highlight}
-                          onChange={(e) => handleArrayChange('highlights', index, e.target.value)}
-                          placeholder="e.g., Visit the highest motorable pass"
-                        />
-                        {packageData.highlights.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeArrayItem('highlights', index)}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Requirements */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label>Requirements</Label>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addArrayItem('requirements')}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    {packageData.requirements.map((requirement, index) => (
-                      <div key={index} className="flex items-center gap-2 mb-2">
-                        <Input
-                          value={requirement}
-                          onChange={(e) => handleArrayChange('requirements', index, e.target.value)}
-                          placeholder="e.g., Valid ID proof"
-                        />
-                        {packageData.requirements.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeArrayItem('requirements', index)}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Included */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label>What's Included</Label>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addArrayItem('included')}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    {packageData.included.map((item, index) => (
-                      <div key={index} className="flex items-center gap-2 mb-2">
-                        <Input
-                          value={item}
-                          onChange={(e) => handleArrayChange('included', index, e.target.value)}
-                          placeholder="e.g., All accommodation"
-                        />
-                        {packageData.included.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeArrayItem('included', index)}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Not Included */}
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <Label>What's Not Included</Label>
-                      <Button type="button" variant="outline" size="sm" onClick={() => addArrayItem('notIncluded')}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    {packageData.notIncluded.map((item, index) => (
-                      <div key={index} className="flex items-center gap-2 mb-2">
-                        <Input
-                          value={item}
-                          onChange={(e) => handleArrayChange('notIncluded', index, e.target.value)}
-                          placeholder="e.g., Airfare to/from destination"
-                        />
-                        {packageData.notIncluded.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => removeArrayItem('notIncluded', index)}
-                          >
-                            <Minus className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addArrayItem('inclusions')}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Inclusion
+                  </Button>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
 
-          <div className="flex justify-end gap-4 mt-8">
-            <Button type="button" variant="outline" onClick={() => navigate('/travel-agent/dashboard')}>
-              Cancel
-            </Button>
-            <Button type="submit" className="bg-orange-500 hover:bg-orange-600">
-              <Save className="w-4 h-4 mr-2" />
-              Create Package
-            </Button>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Exclusions</CardTitle>
+                  <CardDescription>What's not included in the package</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {formData.exclusions.map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => handleArrayChange('exclusions', index, e.target.value)}
+                        placeholder="e.g., Airfare"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeArrayItem('exclusions', index)}
+                        className="text-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addArrayItem('exclusions')}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Exclusion
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Highlights & Tags */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Highlights</CardTitle>
+                  <CardDescription>Key attractions and experiences</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {formData.highlights.map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => handleArrayChange('highlights', index, e.target.value)}
+                        placeholder="e.g., Visit to Taj Mahal"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeArrayItem('highlights', index)}
+                        className="text-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addArrayItem('highlights')}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Highlight
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tags</CardTitle>
+                  <CardDescription>Keywords for better discoverability</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {formData.tags.map((item, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => handleArrayChange('tags', index, e.target.value)}
+                        placeholder="e.g., Culture, Heritage"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeArrayItem('tags', index)}
+                        className="text-red-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addArrayItem('tags')}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Add Tag
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Images */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Images</CardTitle>
+                <CardDescription>Add image URLs for your package</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {formData.images.map((item, index) => (
+                  <div key={index} className="flex gap-2">
+                    <Input
+                      value={item}
+                      onChange={(e) => handleArrayChange('images', index, e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => removeArrayItem('images', index)}
+                      className="text-red-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => addArrayItem('images')}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Image URL
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Submit */}
+            <div className="flex gap-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/travel-agent/dashboard')}
+                className="flex-1"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-orange-500 hover:bg-orange-600"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating Package...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Create Package
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </form>
       </div>

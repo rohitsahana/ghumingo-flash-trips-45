@@ -6,9 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Upload, CheckCircle } from 'lucide-react';
 
 const TravelAgentOnboarding = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     agencyName: '',
     contactPerson: '',
@@ -20,7 +24,7 @@ const TravelAgentOnboarding = () => {
     description: '',
     website: '',
     license: '',
-    aadharCard: null as File | null
+    aadharCardImage: ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -34,19 +38,126 @@ const TravelAgentOnboarding = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFormData(prev => ({
-        ...prev,
-        aadharCard: file
-      }));
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File Too Large",
+          description: "Please upload an image smaller than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid File Type",
+          description: "Please upload an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          aadharCardImage: e.target?.result as string
+        }));
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    if (!formData.agencyName.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your agency name",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.contactPerson.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter contact person name",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.email.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.phone.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your phone number",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.address.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your business address",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.aadharCardImage) {
+      toast({
+        title: "Missing Information",
+        description: "Please upload your Aadhar card image",
+        variant: "destructive",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here we would normally submit to backend
-    console.log('Travel agent registration:', formData);
-    // Navigate to dashboard after successful registration
-    navigate('/travel-agent/dashboard');
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('http://localhost:6080/api/travel-agents/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Application Submitted!",
+          description: data.message,
+        });
+        navigate('/travel-agent/dashboard');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit application');
+      }
+    } catch (error) {
+      toast({
+        title: "Submission Failed",
+        description: error instanceof Error ? error.message : "Please try again later",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -123,6 +234,7 @@ const TravelAgentOnboarding = () => {
                     value={formData.experience}
                     onChange={handleInputChange}
                     placeholder="5"
+                    min="0"
                   />
                 </div>
                 <div>
@@ -190,18 +302,18 @@ const TravelAgentOnboarding = () => {
                   name="aadharCard"
                   type="file"
                   onChange={handleFileChange}
-                  accept=".pdf,.jpg,.jpeg,.png"
+                  accept="image/*"
                   required
                   className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                 />
                 <p className="text-sm text-gray-500 mt-1">
-                  Upload your Aadhar card (PDF, JPG, PNG format, max 5MB)
+                  Upload your Aadhar card (JPG, PNG format, max 5MB)
                 </p>
-                {formData.aadharCard && (
-                  <p className="text-sm text-green-600 mt-1 flex items-center">
-                    <span className="mr-1">✓</span>
-                    File selected: {formData.aadharCard.name}
-                  </p>
+                {formData.aadharCardImage && (
+                  <div className="mt-2 flex items-center text-sm text-green-600">
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Aadhar card uploaded successfully
+                  </div>
                 )}
               </div>
 
@@ -221,14 +333,26 @@ const TravelAgentOnboarding = () => {
                   variant="outline" 
                   onClick={() => navigate('/')}
                   className="flex-1"
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
                   className="flex-1 bg-orange-500 hover:bg-orange-600"
+                  disabled={isSubmitting}
                 >
-                  Submit Application
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Submit Application
+                    </>
+                  )}
                 </Button>
               </div>
             </form>

@@ -8,6 +8,8 @@ import travelPostsRoutes from './routes/travelPosts.js';
 import tripRoomsRoutes from './routes/tripRooms.js';
 import userTripInterestRoutes from './routes/userTripInterests.js';
 import userVerificationRoutes from './routes/userVerification.js';
+import travelAgentRoutes from './routes/travelAgents.js';
+import bookingRoutes from './routes/bookings.js';
 
 dotenv.config();
 
@@ -32,6 +34,8 @@ app.use('/api/travelposts', travelPostsRoutes);
 app.use('/api/triprooms', tripRoomsRoutes);
 app.use('/api/user-trip-interests', userTripInterestRoutes);
 app.use('/api/user-verification', userVerificationRoutes);
+app.use('/api/travel-agents', travelAgentRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -309,7 +309,7 @@ const CreateTravelPackage = () => {
                       type="number"
                       value={packageData.cost.total}
                       onChange={handleInputChange}
-                      placeholder="45000"
+                      placeholder="46080"
                       required
                     />
                   </div>

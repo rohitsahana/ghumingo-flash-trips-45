@@ -16,7 +16,7 @@ const [loading, setIsLoading] = useState(true);
 // console.log("Trip Rooms:", tripRooms);
 useEffect(() => {
   const fetchRooms = async () => {
-    const res = await fetch(`http://localhost:5000/api/triprooms/${id}`);
+    const res = await fetch(`http://localhost:6080/api/triprooms/${id}`);
     const data = await res.json();
     console.log("Fetched trip rooms:", data,res);
     setTripRoom(data);

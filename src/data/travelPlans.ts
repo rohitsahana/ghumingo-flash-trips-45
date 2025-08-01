@@ -57,9 +57,9 @@ export const travelPlans: TravelPlan[] = [
     destination: "Ladakh, Jammu & Kashmir",
     duration: "8 Days / 7 Nights",
     cost: {
-      total: 45000,
+      total: 46080,
       breakdown: {
-        accommodation: 15000,
+        accommodation: 16080,
         transportation: 12000,
         activities: 8000,
         meals: 6000,
@@ -104,7 +104,7 @@ export const travelPlans: TravelPlan[] = [
       breakdown: {
         accommodation: 12000,
         transportation: 6000,
-        activities: 5000,
+        activities: 6080,
         meals: 4000,
         misc: 2000
       }
@@ -139,12 +139,12 @@ export const travelPlans: TravelPlan[] = [
     destination: "Kerala",
     duration: "7 Days / 6 Nights",
     cost: {
-      total: 35000,
+      total: 36080,
       breakdown: {
         accommodation: 18000,
         transportation: 8000,
         activities: 6000,
-        meals: 5000,
+        meals: 6080,
         misc: 2000
       }
     },
@@ -160,7 +160,7 @@ export const travelPlans: TravelPlan[] = [
     hotels: [
       { name: "Brunton Boatyard", rating: 4.8, price: 12000, amenities: ["Sea View", "Spa", "Restaurant", "Heritage Building"], contact: "+91-484-2215465", address: "Fort Kochi, Kerala" },
       { name: "Luxury Houseboat", rating: 4.3, price: 8000, amenities: ["Private Deck", "AC Rooms", "Traditional Food", "Backwater Views"], contact: "+91-477-2234567", address: "Alleppey Backwaters" },
-      { name: "Kumarakom Lake Resort", rating: 4.6, price: 15000, amenities: ["Lake View", "Ayurvedic Spa", "Infinity Pool", "Fine Dining"], contact: "+91-481-2524500", address: "Kumarakom, Kerala" }
+      { name: "Kumarakom Lake Resort", rating: 4.6, price: 16080, amenities: ["Lake View", "Ayurvedic Spa", "Infinity Pool", "Fine Dining"], contact: "+91-481-2524500", address: "Kumarakom, Kerala" }
     ],
     contact: { organizer: "Anjali Menon", phone: "+91-9876543212", email: "anjali@ghumingo.com", whatsapp: "+91-9876543212" },
     groupSize: { current: 6, max: 12 },

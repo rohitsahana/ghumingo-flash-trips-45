@@ -18,6 +18,8 @@ import TripRoomForm from "./components/ui/tripRoomForm";
 import TravelAgentOnboarding from "./pages/TravelAgentOnboarding";
 import TravelAgentDashboard from "./pages/TravelAgentDashboard";
 import CreateTravelPackage from "./pages/CreateTravelPackage";
+import TravelPlanBooking from "./pages/TravelPlanBooking";
+import UserDashboard from "./pages/UserDashboard";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ const App = () => (
             <Route path="/messaging/:userId" element={<Messaging />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/travel-plans" element={<TravelPlans />} />
+            <Route path="/travel-plan-booking/:id" element={<TravelPlanBooking />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/flash-trip-rooms/new" element={<TripRoomForm />} />
             <Route path="/travel-agent/onboarding" element={<TravelAgentOnboarding />} />
             <Route path="/travel-agent/dashboard" element={<TravelAgentDashboard />} />

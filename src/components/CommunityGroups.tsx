@@ -10,11 +10,12 @@ import { Users, MapPin, Calendar, DollarSign, Hotel, Phone, Mail, Clock, Star, C
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { travelPlans, TravelPlan } from '@/data/travelPlans';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const CommunityGroups = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<TravelPlan | null>(null);
 
@@ -28,19 +29,8 @@ const CommunityGroups = () => {
       return;
     }
 
-    if (joinedGroups.includes(planId)) {
-      setJoinedGroups(joinedGroups.filter(id => id !== planId));
-      toast({
-        title: "Left Community",
-        description: "You have left the travel community",
-      });
-    } else {
-      setJoinedGroups([...joinedGroups, planId]);
-      toast({
-        title: "Joined Community",
-        description: "Welcome to the travel community! Check your email for details.",
-      });
-    }
+    // Navigate to the booking page
+    navigate(`/travel-plan-booking/${planId}`);
   };
 
   const formatCurrency = (amount: number) => {

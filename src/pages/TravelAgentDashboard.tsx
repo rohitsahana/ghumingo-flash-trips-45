@@ -14,7 +14,7 @@ const TravelAgentDashboard = () => {
       title: 'Rajasthan Royal Heritage Tour',
       destination: 'Rajasthan',
       duration: '7 Days / 6 Nights',
-      price: 45000,
+      price: 46080,
       status: 'active',
       bookings: 12,
       views: 245
@@ -24,7 +24,7 @@ const TravelAgentDashboard = () => {
       title: 'Kerala Backwater Paradise',
       destination: 'Kerala',
       duration: '5 Days / 4 Nights',
-      price: 35000,
+      price: 36080,
       status: 'draft',
       bookings: 0,
       views: 0
@@ -35,7 +35,7 @@ const TravelAgentDashboard = () => {
     totalPackages: 8,
     activePackages: 6,
     totalBookings: 45,
-    totalRevenue: 1250000
+    totalRevenue: 1260800
   };
 
   return (

@@ -26,6 +26,11 @@ const Hero = () => {
             user ? (
               <>
                 <span className="text-gray-700">Welcome - {user.email.split("@")[0]}</span>
+                <Link to="/dashboard">
+                  <Button variant="ghost" className="text-gray-700 hover:text-orange-600">
+                    Dashboard
+                  </Button>
+                </Link>
                 <Button 
                   onClick={signOut}
                   variant="ghost" 

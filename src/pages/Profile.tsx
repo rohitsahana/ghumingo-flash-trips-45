@@ -19,7 +19,7 @@ const { userId } = useParams();
 useEffect(() => {
   const fetchProfile = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/profile/`);
+      const response = await fetch(`http://localhost:6080/api/profile/`);
       const data = await response.json();
       setProfile(data);
     } catch (error) {

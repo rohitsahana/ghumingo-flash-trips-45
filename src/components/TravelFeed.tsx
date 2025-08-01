@@ -11,7 +11,7 @@ const TravelFeed = () => {
 
   useEffect(() => {
     const fetchPosts = async () => {
-    const res = await fetch(`http://localhost:5000/api/travelposts/`);
+    const res = await fetch(`http://localhost:6080/api/travelposts/`);
     const data = await res.json();
     console.log("Fetched trip rooms:", data,res);
     setPosts(data);

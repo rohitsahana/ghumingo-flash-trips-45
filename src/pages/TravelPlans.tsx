@@ -1,10 +1,11 @@
 import { travelPlans } from '@/data/travelPlans';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, MapPin, Calendar, Star, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TravelAgentPartnership from '@/components/TravelAgentPartnership';
 
 const formatCurrency = (amount: number) =>
@@ -14,7 +15,14 @@ const formatCurrency = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-const TravelPlans = () => (
+const TravelPlans = () => {
+  const navigate = useNavigate();
+
+  const handleCardClick = (planId: string) => {
+    navigate(`/travel-plan-booking/${planId}`);
+  };
+
+  return (
   <div className="py-16 bg-gradient-to-b from-orange-50/30 to-blue-50/30 min-h-screen">
     <div className="container mx-auto px-6">
       <div className="flex justify-center mb-8">
@@ -33,8 +41,12 @@ const TravelPlans = () => (
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {travelPlans.map(plan => (
-          <Card key={plan.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm">
-            <div className="relative h-48">
+          <Card 
+            key={plan.id} 
+            className="overflow-hidden hover:shadow-xl transition-all duration-300 bg-white/80 backdrop-blur-sm cursor-pointer hover:scale-105 transform"
+            onClick={() => handleCardClick(plan.id)}
+          >
+            <div className="relative h-48 group">
               <img src={plan.image} alt={plan.title} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <div className="absolute top-4 right-4">
@@ -46,6 +58,11 @@ const TravelPlans = () => (
                   <MapPin className="w-4 h-4 mr-1" />
                   <span className="text-sm">{plan.destination}</span>
                 </div>
+              </div>
+              <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <Badge className="bg-blue-500 text-white text-xs">
+                  Click to Book
+                </Badge>
               </div>
             </div>
             <CardContent className="p-6">
@@ -65,9 +82,19 @@ const TravelPlans = () => (
                   <Badge key={tagIndex} variant="secondary" className="bg-orange-100 text-orange-800">{tag}</Badge>
                 ))}
               </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-500 group-hover:text-blue-600 transition-colors">
+                  Click anywhere to book this trip →
+                </div>
+              </div>
               <Dialog>
                 <DialogTrigger asChild>
-                  <button className="underline text-blue-600 hover:text-blue-800 text-sm">View Details</button>
+                  <button 
+                    className="underline text-blue-600 hover:text-blue-800 text-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Quick Preview
+                  </button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
@@ -257,6 +284,22 @@ const TravelPlans = () => (
                       </div>
                     </TabsContent>
                   </Tabs>
+                  <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+                    <Button 
+                      onClick={() => {
+                        handleCardClick(plan.id);
+                        // Close the dialog by clicking outside or pressing escape
+                        const dialog = document.querySelector('[role="dialog"]');
+                        if (dialog) {
+                          const closeButton = dialog.querySelector('[aria-label="Close"]') as HTMLButtonElement;
+                          if (closeButton) closeButton.click();
+                        }
+                      }}
+                      className="bg-orange-500 hover:bg-orange-600"
+                    >
+                      Book This Trip
+                    </Button>
+                  </div>
                 </DialogContent>
               </Dialog>
             </CardContent>
@@ -266,6 +309,7 @@ const TravelPlans = () => (
       <TravelAgentPartnership />
     </div>
   </div>
-);
+  );
+};
 
 export default TravelPlans; 

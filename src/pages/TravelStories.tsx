@@ -55,7 +55,7 @@ const TravelStories = () => {
   // const [loading, setLoading] = useState(true);
 
   // useEffect(() => {
-  //   fetch("http://localhost:5000/api/stories") // Adjust based on your backend URL
+  //   fetch("http://localhost:6080/api/stories") // Adjust based on your backend URL
   //     .then((res) => res.json())
   //     .then((data) => {
   //       setStories(data);
@@ -75,7 +75,7 @@ const TravelStories = () => {
     const fetchStories = async () => {
       try {
         console.log("Hi");
-        const res = await axios.get("http://localhost:5000/api/stories");
+        const res = await axios.get("http://localhost:6080/api/stories");
         console.log("Fetched stories:", res.data);
         setStories(res.data);
       } catch (error) {

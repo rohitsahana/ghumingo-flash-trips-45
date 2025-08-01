@@ -70,29 +70,32 @@ const TravelStories = () => {
   // if (loading) return <p className="text-center mt-10">Loading stories...</p>;
   const [stories, setStories] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStories = async () => {
       try {
-        console.log("Hi");
-        const res = await axios.get("http://localhost:6080/api/stories");
-        console.log("Fetched stories:", res.data);
+        setLoading(true);
+        const res = await axios.get("http://localhost:6080/api/travel-posts");
+        console.log("Fetched travel posts:", res.data);
         setStories(res.data);
       } catch (error) {
-        console.error("Error fetching stories:", error);
+        console.error("Error fetching travel posts:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchStories();
   }, []);
 
-  const handleLike = (storyId: number) => {
+  const handleLike = (storyId: string) => {
     setStories(stories.map(story => 
-      story.id === storyId 
+      story._id === storyId 
         ? { 
             ...story, 
             isLiked: !story.isLiked,
-            likes: story.isLiked ? story.likes - 1 : story.likes + 1
+            likes: story.isLiked ? (story.likes || 1) - 1 : (story.likes || 0) + 1
           }
         : story
     ));
@@ -121,84 +124,100 @@ const TravelStories = () => {
 
         {/* Stories Feed */}
         <div className="max-w-2xl mx-auto space-y-6">
-          {stories.map((story) => (
-            <Card key={story.id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
-              {/* Author Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold">
-                    {story.author.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{story.author}</h3>
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="w-3 h-3 mr-1" />
-                      {story.location}
+          {loading ? (
+            <p className="text-center mt-10">Loading stories...</p>
+          ) : stories.length === 0 ? (
+            <p className="text-center mt-10">No travel stories found yet. Be the first to share yours!</p>
+          ) : (
+            stories.map((story) => (
+              <Card key={story._id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                {/* Author Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    {story.author?.avatar ? (
+                      <img 
+                        src={story.author.avatar} 
+                        alt={story.author.name} 
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold">
+                        {story.author?.name?.split(' ').map(n => n[0]).join('') || 'U'}
+                      </div>
+                    )}
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{story.author?.name || 'Unknown User'}</h3>
+                      <div className="flex items-center text-sm text-gray-600">
+                        <MapPin className="w-3 h-3 mr-1" />
+                        {story.author?.location || story.destination || 'Unknown Location'}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <Link to={`/profile/${story.authorEmail || story.author.replace(' ', '-').toLowerCase()}`}>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Profile
-                  </Button>
-                </Link>
-              </div>
-
-              {/* Story Content */}
-              <div className="mb-4">
-                <div><img src={story.image} alt={story.title} className="w-full h-auto rounded-lg mb-4" /></div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-2">{story.title}</h4>
-                <p className="text-gray-700 mb-3">{story.content}</p>
-                
-                {/* Travel Style Tags */}
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {story.travelStyle.map((style) => (
-                    <Badge key={style} variant="secondary" className="text-xs">
-                      {style}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* Looking For */}
-                {story.lookingFor && (
-                  <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                    <p className="text-sm font-semibold text-blue-800 mb-1">Looking for travel buddy:</p>
-                    <p className="text-blue-700">{story.lookingFor}</p>
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-                <div className="flex items-center space-x-6">
-                  <button 
-                    onClick={() => handleLike(story.id)}
-                    className={`flex items-center space-x-2 transition-colors ${
-                      story.isLiked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
-                    }`}
-                  >
-                    <Heart className={`w-5 h-5 ${story.isLiked ? 'fill-current' : ''}`} />
-                    <span>{story.likes}</span>
-                  </button>
-                  
-                  <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition-colors">
-                    <MessageCircle className="w-5 h-5" />
-                    <span>{story.comments}</span>
-                  </button>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">Rating: ⭐ {story.rating}</span>
-                  <Link to={`/messaging/${story.authorEmail || story.author.replace(' ', '-').toLowerCase()}`}>
-                    <Button size="sm" className="bg-green-500 hover:bg-green-600">
-                      Connect
+                  <Link to={`/profile/${story.author?.name?.replace(' ', '-').toLowerCase() || 'unknown'}`}>
+                    <Button variant="outline" size="sm">
+                      <Eye className="w-4 h-4 mr-2" />
+                      View Profile
                     </Button>
                   </Link>
                 </div>
-              </div>
-            </Card>
-          ))}
+
+                {/* Story Content */}
+                <div className="mb-4">
+                  {story.image && (
+                    <div><img src={story.image} alt={story.destination} className="w-full h-auto rounded-lg mb-4" /></div>
+                  )}
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">{story.destination || 'Travel Story'}</h4>
+                  <p className="text-gray-700 mb-3">{story.content}</p>
+                  
+                  {/* Travel Style Tags */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {story.tags?.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {/* Travel Date */}
+                  {story.travelDate && (
+                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-3">
+                      <p className="text-sm font-semibold text-blue-800 mb-1">Travel Date:</p>
+                      <p className="text-blue-700">{story.travelDate}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                  <div className="flex items-center space-x-6">
+                    <button 
+                      onClick={() => handleLike(story._id)}
+                      className={`flex items-center space-x-2 transition-colors ${
+                        story.isLiked ? 'text-red-500' : 'text-gray-600 hover:text-red-500'
+                      }`}
+                    >
+                      <Heart className={`w-5 h-5 ${story.isLiked ? 'fill-current' : ''}`} />
+                      <span>{story.likes || 0}</span>
+                    </button>
+                    
+                    <button className="flex items-center space-x-2 text-gray-600 hover:text-blue-500 transition-colors">
+                      <MessageCircle className="w-5 h-5" />
+                      <span>{story.comments || 0}</span>
+                    </button>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm text-gray-600">Rating: ⭐ {story.author?.rating || 4.5}</span>
+                    <Link to={`/messaging/${story.author?.name?.replace(' ', '-').toLowerCase() || 'unknown'}`}>
+                      <Button size="sm" className="bg-green-500 hover:bg-green-600">
+                        Connect
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Share Your Story CTA */}

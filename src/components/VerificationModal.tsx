@@ -93,6 +93,12 @@ const VerificationModal = ({ isOpen, onClose, userEmail, onVerificationComplete 
         }),
       });
 
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server returned an invalid response. Please try again.");
+      }
+
       if (response.ok) {
         const data = await response.json();
         toast({
@@ -106,12 +112,25 @@ const VerificationModal = ({ isOpen, onClose, userEmail, onVerificationComplete 
         setAadharCardImage("");
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Verification failed");
+        throw new Error(errorData.error || `Verification failed (${response.status})`);
       }
     } catch (error) {
+      console.error("Verification error:", error);
+      
+      let errorMessage = "Please try again later";
+      if (error instanceof Error) {
+        if (error.message.includes("Failed to fetch")) {
+          errorMessage = "Network error. Please check your connection and try again.";
+        } else if (error.message.includes("Server returned an invalid response")) {
+          errorMessage = "Server error. Please try again in a moment.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
         title: "Verification Failed",
-        description: error instanceof Error ? error.message : "Please try again later",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

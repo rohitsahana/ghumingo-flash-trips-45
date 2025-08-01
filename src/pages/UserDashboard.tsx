@@ -115,62 +115,6 @@ const UserDashboard = () => {
     }
   ];
 
-  // Mock data for interested trips
-  const mockInterestedTrips = [
-    {
-      id: '1',
-      tripId: 'trip1',
-      tripType: 'travel_plan',
-      status: 'accepted',
-      appliedAt: '2024-12-10T10:00:00Z',
-      respondedAt: '2024-12-11T15:30:00Z',
-      message: 'I would love to join this trip!',
-      tripDetails: {
-        title: 'Rajasthan Royal Heritage Tour',
-        destination: 'Rajasthan, India',
-        duration: '7 Days / 6 Nights',
-        cost: { amount: 46080, currency: 'INR' },
-        organizer: {
-          name: 'Royal Travel Agency',
-          verified: true
-        }
-      }
-    },
-    {
-      id: '2',
-      tripId: 'trip2',
-      tripType: 'trip_room',
-      status: 'waiting_for_approval',
-      appliedAt: '2024-12-12T14:20:00Z',
-      message: 'Interested in joining this group trip',
-      tripDetails: {
-        destination: 'Kerala Backwaters',
-        dates: 'Jan 15-20, 2025',
-        budget: '₹25,000',
-        organizer: {
-          name: 'Adventure Seeker',
-          verified: false
-        }
-      }
-    },
-    {
-      id: '3',
-      tripId: 'trip3',
-      tripType: 'travel_post',
-      status: 'pending',
-      appliedAt: '2024-12-13T09:15:00Z',
-      message: 'Looking forward to this adventure!',
-      tripDetails: {
-        destination: 'Ladakh, India',
-        travelDate: 'March 2025',
-        author: {
-          name: 'Mountain Explorer',
-          verified: true
-        }
-      }
-    }
-  ];
-
   const handleSupportSubmit = () => {
     if (!supportMessage.trim()) {
       toast({
@@ -211,22 +155,21 @@ const UserDashboard = () => {
 
   // Function to fetch interested trips
   const fetchInterestedTrips = async () => {
-    if (!user?.id) return;
+    if (!user?.email) return;
     
     setLoadingInterestedTrips(true);
     try {
-      const response = await fetch(`http://localhost:6080/api/user-trip-interests/user/${user.id}`);
+      const response = await fetch(`http://localhost:6080/api/user-trip-interests/user/${user.email}`);
       if (response.ok) {
         const data = await response.json();
         setInterestedTrips(data);
       } else {
-        // For now, use mock data if API fails
-        setInterestedTrips(mockInterestedTrips);
+        console.error('Failed to fetch interested trips');
+        setInterestedTrips([]);
       }
     } catch (error) {
       console.error('Failed to fetch interested trips:', error);
-      // Use mock data as fallback
-      setInterestedTrips(mockInterestedTrips);
+      setInterestedTrips([]);
     } finally {
       setLoadingInterestedTrips(false);
     }
@@ -235,7 +178,7 @@ const UserDashboard = () => {
   // Load interested trips when component mounts
   useEffect(() => {
     fetchInterestedTrips();
-  }, [user?.id]);
+  }, [user?.email]);
 
   // Function to fetch user's trip posts
   const fetchMyTripPosts = async () => {

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Heart, MessageCircle, Eye, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import TravelPostForm from "@/components/ui/TravelPostForm";
 const TravelStories = () => {
   // const [stories, setStories] = useState([
   //   {
@@ -68,6 +69,7 @@ const TravelStories = () => {
 
   // if (loading) return <p className="text-center mt-10">Loading stories...</p>;
   const [stories, setStories] = useState([]);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const fetchStories = async () => {
@@ -207,9 +209,20 @@ const TravelStories = () => {
           <p className="text-gray-600 mb-6">
             Inspire others with your adventures and find your next travel buddy!
           </p>
-          <Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white px-8">
-            Share Story
+          <Button 
+            size="lg" 
+            className="bg-orange-500 hover:bg-orange-600 text-white px-8"
+            onClick={() => setShowForm(!showForm)}
+          >
+            {showForm ? "Close Form" : "Share Story"}
           </Button>
+          
+          {/* Conditionally Render the Form */}
+          {showForm && (
+            <div className="mt-6">
+              <TravelPostForm onSuccess={() => setShowForm(false)} />
+            </div>
+          )}
         </Card>
       </div>
     </div>

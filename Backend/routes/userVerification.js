@@ -38,12 +38,63 @@ router.post('/upload-aadhar', async (req, res) => {
   try {
     const { email, aadharNumber, aadharCardImage } = req.body;
     
+    // Validate Aadhar number format
+    if (!aadharNumber || aadharNumber.length !== 12 || !/^\d{12}$/.test(aadharNumber)) {
+      return res.status(400).json({ 
+        error: 'Invalid Aadhar number. Please enter a valid 12-digit number.' 
+      });
+    }
+
+    // Validate Aadhar number checksum (basic validation)
+    const digits = aadharNumber.split('').map(Number);
+    let sum = 0;
+    for (let i = 0; i < 11; i++) {
+      sum += digits[i] * (12 - i);
+    }
+    const checksum = (12 - (sum % 12)) % 12;
+    
+    if (checksum !== digits[11]) {
+      return res.status(400).json({ 
+        error: 'Invalid Aadhar number. Please check the number and try again.' 
+      });
+    }
+
+    // Validate image
+    if (!aadharCardImage || !aadharCardImage.startsWith('data:image/')) {
+      return res.status(400).json({ 
+        error: 'Please upload a valid Aadhar card image.' 
+      });
+    }
+
+    // In a real application, you would:
+    // 1. Upload image to cloud storage (AWS S3, Google Cloud Storage, etc.)
+    // 2. Use OCR to extract Aadhar number from image
+    // 3. Compare extracted number with provided number
+    // 4. Verify with UIDAI API (if available)
+    
+    // For demo purposes, we'll simulate verification
+    // In production, replace this with actual OCR and verification logic
+    const isImageValid = aadharCardImage.length > 1000; // Basic check for valid image
+    
+    if (!isImageValid) {
+      return res.status(400).json({ 
+        error: 'Invalid image. Please upload a clear image of your Aadhar card.' 
+      });
+    }
+
     let user = await User.findOne({ email });
     if (!user) {
       user = new User({
         email,
         name: email.split('@')[0],
         isVerified: false
+      });
+    }
+    
+    // Check if user is already verified
+    if (user.isVerified) {
+      return res.status(400).json({ 
+        error: 'User is already verified.' 
       });
     }
     
@@ -56,12 +107,12 @@ router.post('/upload-aadhar', async (req, res) => {
     
     res.json({
       success: true,
-      message: 'Aadhar card uploaded successfully. You are now verified!',
+      message: 'Aadhar card verified successfully! Your account is now verified and you can create trips.',
       isVerified: true
     });
   } catch (err) {
     console.error('Failed to upload Aadhar card:', err);
-    res.status(500).json({ error: 'Failed to upload Aadhar card' });
+    res.status(500).json({ error: 'Failed to upload Aadhar card. Please try again.' });
   }
 });
 

@@ -42,6 +42,12 @@ const travelAgentSchema = new mongoose.Schema({
     type: String, // URL to stored image
     required: true
   },
+  aadharNumber: {
+    type: String,
+    required: function() {
+      return this.isVerified;
+    }
+  },
   isVerified: {
     type: Boolean,
     default: false

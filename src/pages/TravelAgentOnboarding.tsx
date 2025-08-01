@@ -7,12 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, CheckCircle } from 'lucide-react';
+import { Loader2, Upload, CheckCircle, Eye, EyeOff } from 'lucide-react';
 
 const TravelAgentOnboarding = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showImage, setShowImage] = useState(false);
   const [formData, setFormData] = useState({
     agencyName: '',
     contactPerson: '',
@@ -24,15 +25,54 @@ const TravelAgentOnboarding = () => {
     description: '',
     website: '',
     license: '',
-    aadharCardImage: ''
+    aadharCardImage: '',
+    aadharNumber: ''
   });
+
+  // Validate Aadhar number format
+  const validateAadharNumber = (aadharNumber: string) => {
+    const cleanAadhar = aadharNumber.replace(/\s/g, '');
+    if (!/^\d{12}$/.test(cleanAadhar)) {
+      return { isValid: false, error: 'Aadhar number must be exactly 12 digits' };
+    }
+
+    // Basic checksum validation
+    const digits = cleanAadhar.split('').map(Number);
+    let sum = 0;
+    for (let i = 0; i < 11; i++) {
+      sum += digits[i] * (12 - i);
+    }
+    const checksum = (10 - (sum % 10)) % 10;
+    
+    if (digits[11] !== checksum) {
+      return { isValid: false, error: 'Invalid Aadhar number checksum' };
+    }
+
+    return { isValid: true, cleanAadhar };
+  };
+
+  // Format Aadhar number with spaces
+  const formatAadharNumber = (value: string) => {
+    const clean = value.replace(/\s/g, '');
+    const formatted = clean.replace(/(\d{4})(?=\d)/g, '$1 ');
+    return formatted.trim();
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    if (name === 'aadharNumber') {
+      const formatted = formatAadharNumber(value);
+      setFormData(prev => ({
+        ...prev,
+        [name]: formatted
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +145,15 @@ const TravelAgentOnboarding = () => {
     if (!formData.address.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please enter your business address",
+        description: "Please enter your address",
+        variant: "destructive",
+      });
+      return false;
+    }
+    if (!formData.aadharNumber.trim()) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter your Aadhar number",
         variant: "destructive",
       });
       return false;
@@ -118,6 +166,18 @@ const TravelAgentOnboarding = () => {
       });
       return false;
     }
+
+    // Validate Aadhar number
+    const aadharValidation = validateAadharNumber(formData.aadharNumber);
+    if (!aadharValidation.isValid) {
+      toast({
+        title: "Invalid Aadhar Number",
+        description: aadharValidation.error,
+        variant: "destructive",
+      });
+      return false;
+    }
+
     return true;
   };
 
@@ -314,6 +374,34 @@ const TravelAgentOnboarding = () => {
                     <CheckCircle className="w-4 h-4 mr-1" />
                     Aadhar card uploaded successfully
                   </div>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="aadharNumber">Aadhar Number *</Label>
+                <div className="flex items-center border rounded-md p-2">
+                  <Input
+                    id="aadharNumber"
+                    name="aadharNumber"
+                    type={showImage ? "text" : "password"}
+                    value={formData.aadharNumber}
+                    onChange={handleInputChange}
+                    placeholder="Enter your 12-digit Aadhar number"
+                    required
+                    className="flex-1"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowImage(!showImage)}
+                    className="p-2 text-gray-600 hover:text-gray-800"
+                  >
+                    {showImage ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+                {formData.aadharNumber && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Formatted Aadhar Number: {formatAadharNumber(formData.aadharNumber)}
+                  </p>
                 )}
               </div>
 

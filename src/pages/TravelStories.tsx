@@ -137,7 +137,7 @@ const TravelStories = () => {
                     </div>
                   </div>
                 </div>
-                <Link to={`/profile/${story.author.replace(' ', '-').toLowerCase()}`}>
+                <Link to={`/profile/${story.authorEmail || story.author.replace(' ', '-').toLowerCase()}`}>
                   <Button variant="outline" size="sm">
                     <Eye className="w-4 h-4 mr-2" />
                     View Profile
@@ -190,7 +190,7 @@ const TravelStories = () => {
 
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600">Rating: ⭐ {story.rating}</span>
-                  <Link to={`/messaging/${story.author.replace(' ', '-').toLowerCase()}`}>
+                  <Link to={`/messaging/${story.authorEmail || story.author.replace(' ', '-').toLowerCase()}`}>
                     <Button size="sm" className="bg-green-500 hover:bg-green-600">
                       Connect
                     </Button>

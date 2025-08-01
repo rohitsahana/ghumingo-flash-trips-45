@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, MapPin, Calendar, Users, Shield, Flag } from "lucide-react";
+import { Star, MapPin, Calendar, Users, Shield, Flag, MessageSquare, Phone } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 const Profile = () => {
@@ -28,33 +28,6 @@ const Profile = () => {
       } catch (error) {
         console.error("Failed to fetch profile:", error);
         setError("Failed to load profile");
-        // Set mock data as fallback
-        setProfile({
-          name: "Adventure Seeker",
-          location: "Mumbai, India",
-          memberSince: "2023",
-          rating: 4.8,
-          completedTrips: 12,
-          followers: 234,
-          verified: true,
-          bio: "Passionate traveler who loves exploring new destinations and meeting fellow adventurers.",
-          travelStyle: ["Adventure", "Culture", "Photography"],
-          languages: ["English", "Hindi", "Marathi"],
-          interests: ["Trekking", "Beach Activities", "Local Cuisine"],
-          pastTrips: [
-            { destination: "Ladakh", date: "2024", rating: 5, duration: "7 days", review: "Amazing experience!" },
-            { destination: "Goa", date: "2023", rating: 4.8, duration: "5 days", review: "Great beaches and culture!" },
-            { destination: "Kerala", date: "2023", rating: 4.9, duration: "6 days", review: "Beautiful backwaters!" }
-          ],
-          reviews: [
-            { reviewer: "Travel Buddy", trip: "Ladakh Trip", date: "2024", rating: 5, comment: "Great travel companion!" },
-            { reviewer: "Adventure Partner", trip: "Goa Trip", date: "2023", rating: 4.8, comment: "Very organized and fun to travel with." }
-          ],
-          safetyBadges: ["Verified", "Trusted", "Responsive"],
-          upcomingTrips: [
-            { destination: "Rajasthan", date: "2025", lookingFor: "Looking for travel buddies" }
-          ]
-        });
       } finally {
         setLoading(false);
       }
@@ -95,6 +68,19 @@ const Profile = () => {
     );
   }
 
+  // Format member since date
+  const formatMemberSince = (date) => {
+    if (!date) return 'Unknown';
+    const memberDate = new Date(date);
+    return memberDate.getFullYear().toString();
+  };
+
+  // Get initials for avatar
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-blue-50 to-green-50">
       {/* Navigation */}
@@ -111,13 +97,21 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row items-start gap-6">
             {/* Profile Picture & Basic Info */}
             <div className="flex flex-col items-center md:items-start">
-              <div className="w-32 h-32 bg-gradient-to-r from-orange-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-4xl mb-4">
-                {profile.name ? profile.name.split(' ').map(n => n[0]).join('') : 'U'}
-              </div>
+              {profile.avatar ? (
+                <img 
+                  src={profile.avatar} 
+                  alt={profile.name}
+                  className="w-32 h-32 rounded-full object-cover mb-4"
+                />
+              ) : (
+                <div className="w-32 h-32 bg-gradient-to-r from-orange-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-4xl mb-4">
+                  {getInitials(profile.name)}
+                </div>
+              )}
               
               <div className="flex items-center space-x-2 mb-2">
                 <h1 className="text-3xl font-bold text-gray-900">{profile.name || 'Unknown User'}</h1>
-                {profile.verified && (
+                {profile.isVerified && (
                   <Badge className="bg-blue-100 text-blue-800">
                     <Shield className="w-3 h-3 mr-1" />
                     Verified
@@ -132,7 +126,7 @@ const Profile = () => {
 
               <div className="flex items-center text-gray-600 mb-4">
                 <Calendar className="w-4 h-4 mr-2" />
-                Member since {profile.memberSince || 'Unknown'}
+                Member since {formatMemberSince(profile.memberSince)}
               </div>
 
               {/* Stats */}
@@ -155,6 +149,7 @@ const Profile = () => {
               <div className="flex gap-2 w-full">
                 <Link to={`/messaging/${userId || 'default'}`} className="flex-1">
                   <Button className="w-full bg-blue-500 hover:bg-blue-600">
+                    <MessageSquare className="w-4 h-4 mr-2" />
                     Message
                   </Button>
                 </Link>
@@ -241,58 +236,88 @@ const Profile = () => {
           </TabsList>
 
           <TabsContent value="trips" className="space-y-4">
-            {(profile.pastTrips || []).map((trip, index) => (
-              <Card key={index} className="p-6 bg-white/70 backdrop-blur-sm border-orange-100">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">{trip.destination}</h3>
-                    <p className="text-gray-600">{trip.date} • {trip.duration || 'Duration not specified'}</p>
-                  </div>
-                  <div className="flex items-center">
-                    {[...Array(trip.rating || 0)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-700">{trip.review || 'No review available'}</p>
+            {(profile.pastTrips || []).length === 0 ? (
+              <Card className="p-6 bg-white/70 backdrop-blur-sm border-orange-100">
+                <p className="text-gray-500 text-center">No past trips to display</p>
               </Card>
-            ))}
+            ) : (
+              (profile.pastTrips || []).map((trip, index) => (
+                <Card key={index} className="p-6 bg-white/70 backdrop-blur-sm border-orange-100">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">{trip.destination}</h3>
+                      <p className="text-gray-600">{trip.date} • {trip.duration || 'Duration not specified'}</p>
+                      <Badge variant="outline" className="mt-1">
+                        {trip.tripType || 'travel_post'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center">
+                      {[...Array(Math.floor(trip.rating || 0))].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                      ))}
+                      {trip.rating % 1 !== 0 && (
+                        <Star className="w-4 h-4 text-yellow-500 fill-current opacity-50" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-gray-700">{trip.review || 'No review available'}</p>
+                </Card>
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="reviews" className="space-y-4">
-            {(profile.reviews || []).map((review, index) => (
-              <Card key={index} className="p-6 bg-white/70 backdrop-blur-sm border-blue-100">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{review.reviewer || review.from}</h3>
-                    <p className="text-sm text-gray-600">{review.trip} • {review.date}</p>
-                  </div>
-                  <div className="flex items-center">
-                    {[...Array(review.rating || 0)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-700">{review.comment}</p>
+            {(profile.reviews || []).length === 0 ? (
+              <Card className="p-6 bg-white/70 backdrop-blur-sm border-blue-100">
+                <p className="text-gray-500 text-center">No reviews to display</p>
               </Card>
-            ))}
+            ) : (
+              (profile.reviews || []).map((review, index) => (
+                <Card key={index} className="p-6 bg-white/70 backdrop-blur-sm border-blue-100">
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{review.reviewerName || review.reviewer || 'Anonymous'}</h3>
+                      <p className="text-sm text-gray-600">{review.tripId} • {new Date(review.date).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex items-center">
+                      {[...Array(Math.floor(review.rating || 0))].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-yellow-500 fill-current" />
+                      ))}
+                      {review.rating % 1 !== 0 && (
+                        <Star className="w-4 h-4 text-yellow-500 fill-current opacity-50" />
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-gray-700">{review.comment}</p>
+                </Card>
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="upcoming" className="space-y-4">
-            {(profile.upcomingTrips || []).map((trip, index) => (
-              <Card key={index} className="p-6 bg-white/70 backdrop-blur-sm border-green-100">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">{trip.destination}</h3>
-                    <p className="text-gray-600">{trip.date}</p>
-                    <p className="text-blue-600">{trip.lookingFor}</p>
-                  </div>
-                  <Button className="bg-orange-500 hover:bg-orange-600">
-                    Join Trip
-                  </Button>
-                </div>
+            {(profile.upcomingTrips || []).length === 0 ? (
+              <Card className="p-6 bg-white/70 backdrop-blur-sm border-green-100">
+                <p className="text-gray-500 text-center">No upcoming trips to display</p>
               </Card>
-            ))}
+            ) : (
+              (profile.upcomingTrips || []).map((trip, index) => (
+                <Card key={index} className="p-6 bg-white/70 backdrop-blur-sm border-green-100">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">{trip.destination}</h3>
+                      <p className="text-gray-600">{trip.date}</p>
+                      <p className="text-blue-600">{trip.lookingFor}</p>
+                      <Badge variant="outline" className="mt-1">
+                        {trip.tripType || 'travel_post'}
+                      </Badge>
+                    </div>
+                    <Button className="bg-orange-500 hover:bg-orange-600">
+                      Join Trip
+                    </Button>
+                  </div>
+                </Card>
+              ))
+            )}
           </TabsContent>
         </Tabs>
       </div>

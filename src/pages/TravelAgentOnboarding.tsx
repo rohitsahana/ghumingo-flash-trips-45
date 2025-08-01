@@ -19,7 +19,8 @@ const TravelAgentOnboarding = () => {
     specializations: '',
     description: '',
     website: '',
-    license: ''
+    license: '',
+    aadharCard: null as File | null
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -28,6 +29,16 @@ const TravelAgentOnboarding = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData(prev => ({
+        ...prev,
+        aadharCard: file
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -170,6 +181,28 @@ const TravelAgentOnboarding = () => {
                   placeholder="Tell us about your travel agency, your experience, and what makes you unique..."
                   rows={4}
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="aadharCard">Aadhar Card (For Verification) *</Label>
+                <Input
+                  id="aadharCard"
+                  name="aadharCard"
+                  type="file"
+                  onChange={handleFileChange}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  required
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
+                />
+                <p className="text-sm text-gray-500 mt-1">
+                  Upload your Aadhar card (PDF, JPG, PNG format, max 5MB)
+                </p>
+                {formData.aadharCard && (
+                  <p className="text-sm text-green-600 mt-1 flex items-center">
+                    <span className="mr-1">✓</span>
+                    File selected: {formData.aadharCard.name}
+                  </p>
+                )}
               </div>
 
               <div className="bg-blue-50 p-4 rounded-lg">

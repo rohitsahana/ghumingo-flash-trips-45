@@ -76,8 +76,11 @@ const TravelStories = () => {
     const fetchStories = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("http://localhost:6080/api/travel-posts");
+        console.log("Fetching travel posts...");
+        const res = await axios.get("http://localhost:6080/api/travelposts");
         console.log("Fetched travel posts:", res.data);
+        console.log("Number of posts:", res.data.length);
+        console.log("Posts structure:", res.data[0]);
         setStories(res.data);
       } catch (error) {
         console.error("Error fetching travel posts:", error);
@@ -88,6 +91,12 @@ const TravelStories = () => {
 
     fetchStories();
   }, []);
+
+  // Debug: Log stories state changes
+  useEffect(() => {
+    console.log("Stories state updated:", stories);
+    console.log("Stories length:", stories.length);
+  }, [stories]);
 
   const handleLike = (storyId: string) => {
     setStories(stories.map(story => 

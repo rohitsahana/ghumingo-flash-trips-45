@@ -9,16 +9,84 @@ const [loading, setIsLoading] = useState(true);
 
 useEffect(() => {
   const fetchRooms = async () => {
-    const res = await fetch("http://localhost:6080/api/triprooms/");
-    const data = await res.json();
-    console.log("Fetched trip rooms:", data,res);
-    setTripRooms(data);
+    try {
+      setIsLoading(true);
+      const res = await fetch("http://localhost:6080/api/triprooms/");
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      console.log("Fetched trip rooms:", data);
+      setTripRooms(data);
+    } catch (error) {
+      console.error("Error fetching trip rooms:", error);
+      // Use mock data as fallback
+      setTripRooms([
+        {
+          id: '1',
+          destination: 'Goa Beach Adventure',
+          dates: 'Jan 15-20, 2025',
+          budget: '₹25,000',
+          spotsLeft: 3,
+          totalSpots: 8,
+          vibe: ['Beach', 'Party', 'Adventure'],
+          expiresIn: 8,
+          price: 25000,
+          organizer: {
+            name: 'Adventure Seeker',
+            avatar: 'https://ui-avatars.com/api/?name=Adventure+Seeker',
+            rating: 4.8,
+            verified: true,
+            completedTrips: 12
+          }
+        },
+        {
+          id: '2',
+          destination: 'Rishikesh River Rafting',
+          dates: 'Feb 1-5, 2025',
+          budget: '₹18,000',
+          spotsLeft: 2,
+          totalSpots: 6,
+          vibe: ['Adventure', 'Nature', 'Thrilling'],
+          expiresIn: 12,
+          price: 18000,
+          organizer: {
+            name: 'River Explorer',
+            avatar: 'https://ui-avatars.com/api/?name=River+Explorer',
+            rating: 4.9,
+            verified: true,
+            completedTrips: 8
+          }
+        },
+        {
+          id: '3',
+          destination: 'Kerala Backwaters',
+          dates: 'Mar 10-15, 2025',
+          budget: '₹30,000',
+          spotsLeft: 4,
+          totalSpots: 10,
+          vibe: ['Culture', 'Relaxation', 'Photography'],
+          expiresIn: 24,
+          price: 30000,
+          organizer: {
+            name: 'Culture Explorer',
+            avatar: 'https://ui-avatars.com/api/?name=Culture+Explorer',
+            rating: 4.7,
+            verified: false,
+            completedTrips: 5
+          }
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  setIsLoading(false);
+  
   fetchRooms();
 }, []);
-if (loading || !tripRooms) {
-  return <div className="p-6 text-center">Loading profile... Profile</div>;
+
+if (loading) {
+  return <div className="p-6 text-center">Loading flash trip rooms...</div>;
 }
 
   return (

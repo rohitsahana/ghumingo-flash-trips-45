@@ -19,43 +19,12 @@ const { userId } = useParams();
 useEffect(() => {
   const fetchProfile = async () => {
     try {
-      setLoading(true);
       const response = await fetch(`http://localhost:6080/api/profile/`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
       const data = await response.json();
       setProfile(data);
     } catch (error) {
       console.error("Failed to fetch profile:", error);
-      // Use mock data as fallback
-      setProfile({
-        name: 'Adventure Seeker',
-        location: 'Mumbai, India',
-        memberSince: '2023',
-        verified: true,
-        rating: 4.8,
-        completedTrips: 12,
-        followers: 234,
-        following: 156,
-        bio: 'Passionate traveler and adventure seeker. Love exploring new places and meeting fellow travelers.',
-        travelStyle: ['Adventure', 'Culture', 'Nature'],
-        languages: ['English', 'Hindi', 'Marathi'],
-        interests: ['Trekking', 'Photography', 'Local Cuisine'],
-        pastTrips: [
-          { destination: 'Ladakh', date: '2024', rating: 5 },
-          { destination: 'Goa', date: '2023', rating: 4 },
-          { destination: 'Kerala', date: '2023', rating: 5 }
-        ],
-        reviews: [
-          { from: 'Travel Buddy', rating: 5, comment: 'Great travel companion!' },
-          { from: 'Adventure Group', rating: 4, comment: 'Very organized and fun!' }
-        ],
-        safetyBadges: ['Verified', 'Trusted Traveler', 'Safety First'],
-        upcomingTrips: [
-          { destination: 'Rajasthan', date: '2025', status: 'Planning' }
-        ]
-      });
+      
     } finally {
       setLoading(false);
     }
@@ -63,9 +32,8 @@ useEffect(() => {
 
   fetchProfile();
 }, [userId]);
-
-if (loading) {
-  return <div className="p-6 text-center">Loading profile...</div>;
+if (loading || !profile) {
+  return <div className="p-6 text-center">Loading profile... Profile</div>;
 }
 
   return (

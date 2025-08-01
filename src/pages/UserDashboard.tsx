@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Star, Calendar, MessageSquare, Eye, TrendingUp, Settings, HelpCircle, 
-  Bell, Mail, Phone, Send, Plus, Edit, Trash2, Headphones, BookOpen, MessageCircle
+  Bell, Mail, Phone, Send, Plus, Edit, Trash2, Headphones, BookOpen, MessageCircle,
+  Shield, Lock, UserCheck
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import CreateTripForm from "@/components/CreateTripForm";
+import VerificationModal from "@/components/VerificationModal";
+import TripDetailModal from "@/components/TripDetailModal";
 
 const UserDashboard = () => {
   const { user } = useAuth();
@@ -39,6 +42,14 @@ const UserDashboard = () => {
   const [loadingInterestedTrips, setLoadingInterestedTrips] = useState(false);
   const [myTripPosts, setMyTripPosts] = useState([]);
   const [loadingMyTrips, setLoadingMyTrips] = useState(false);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [showTripDetailModal, setShowTripDetailModal] = useState(false);
+  const [selectedTripId, setSelectedTripId] = useState('');
+  const [selectedTripType, setSelectedTripType] = useState('');
+  const [userVerificationStatus, setUserVerificationStatus] = useState({
+    isVerified: false,
+    email: user?.email || ''
+  });
 
   // Dynamic stats based on actual data
   const userStats = {
@@ -212,9 +223,19 @@ const UserDashboard = () => {
     fetchMyTripPosts();
   }, [user?.email]);
 
-  const handleViewTripDetails = (tripId: string) => {
-    // Navigate to the trip detail page
-    window.open(`/travel-plan-booking/${tripId}`, '_blank');
+  const handleViewTripDetails = (tripId: string, tripType: string = 'travel_post') => {
+    setSelectedTripId(tripId);
+    setSelectedTripType(tripType);
+    setShowTripDetailModal(true);
+  };
+
+  const handleVerificationComplete = () => {
+    checkVerificationStatus();
+    toast({
+      title: "Verification Successful!",
+      description: "Your account has been verified. You can now create trips.",
+    });
+    setShowVerificationModal(false);
   };
 
   const handleEditTrip = (tripId: string) => {
@@ -239,6 +260,26 @@ const UserDashboard = () => {
     }
     return num.toString();
   };
+
+  // Function to check user verification status
+  const checkVerificationStatus = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const response = await fetch(`http://localhost:6080/api/user-verification/status/${user.email}`);
+      if (response.ok) {
+        const data = await response.json();
+        setUserVerificationStatus(data);
+      }
+    } catch (error) {
+      console.error('Failed to check verification status:', error);
+    }
+  };
+
+  // Check verification status on component mount
+  useEffect(() => {
+    checkVerificationStatus();
+  }, [user?.email]);
 
   if (!user) {
     return (
@@ -412,6 +453,19 @@ const UserDashboard = () => {
               <h1 className="text-2xl font-bold text-gray-900 mb-2">
                 Welcome back, {user.email?.split('@')[0]}!
               </h1>
+              <div className="flex items-center space-x-2 mb-2">
+                {userVerificationStatus.isVerified ? (
+                  <Badge className="bg-green-100 text-green-800">
+                    <Shield className="w-3 h-3 mr-1" />
+                    Verified
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700">
+                    <Lock className="w-3 h-3 mr-1" />
+                    Unverified
+                  </Badge>
+                )}
+              </div>
               <div className="flex items-center text-gray-600 mb-4">
                 <Calendar className="w-4 h-4 mr-2" />
                 Member since {new Date().getFullYear()}
@@ -531,95 +585,134 @@ const UserDashboard = () => {
           <TabsContent value="my-trips" className="space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-2xl font-bold text-gray-900">My Trip Posts</h3>
-              <Button 
-                className="bg-orange-500 hover:bg-orange-600"
-                onClick={() => setShowCreateTrip(true)}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create New Trip
-              </Button>
+              {userVerificationStatus.isVerified ? (
+                <Button 
+                  className="bg-orange-500 hover:bg-orange-600"
+                  onClick={() => setShowCreateTrip(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New Trip
+                </Button>
+              ) : (
+                <Button 
+                  className="bg-blue-500 hover:bg-blue-600"
+                  onClick={() => setShowVerificationModal(true)}
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Get Verified to Create Trips
+                </Button>
+              )}
             </div>
 
-            {loadingMyTrips ? (
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+            {!userVerificationStatus.isVerified ? (
+              <Card className="p-8 bg-white/80 backdrop-blur-sm border-orange-100">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
-                  <p className="mt-2 text-gray-600">Loading your trip posts...</p>
-                </div>
-              </Card>
-            ) : myTripPosts.length === 0 ? (
-              <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Calendar className="w-8 h-8 text-gray-400" />
+                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Lock className="w-8 h-8 text-orange-500" />
                   </div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Trip Posts Yet</h4>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">Verification Required</h4>
                   <p className="text-gray-600 mb-4">
-                    You haven't posted any trips yet. Start creating your own travel plans!
+                    To create and manage your own trips, you need to verify your account with your Aadhar card. 
+                    This helps ensure the safety and trust of our community.
                   </p>
-                  <Button onClick={() => setShowCreateTrip(true)} className="bg-orange-500 hover:bg-orange-600">
-                    Create New Trip
-                  </Button>
+                  <div className="space-y-2">
+                    <Button 
+                      onClick={() => setShowVerificationModal(true)}
+                      className="bg-blue-500 hover:bg-blue-600"
+                    >
+                      <Shield className="w-4 h-4 mr-2" />
+                      Verify My Account
+                    </Button>
+                    <p className="text-sm text-gray-500">
+                      You can still show interest in others' trips without verification
+                    </p>
+                  </div>
                 </div>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {myTripPosts.map((trip) => (
-                  <Card key={trip._id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-900">{trip.content}</h4>
-                        <p className="text-sm text-gray-600">{trip.destination}</p>
-                        <p className="text-xs text-gray-500">{trip.travelDate}</p>
-                      </div>
-                      <Badge variant="default">
-                        Active
-                      </Badge>
+              <>
+                {loadingMyTrips ? (
+                  <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                      <p className="mt-2 text-gray-600">Loading your trip posts...</p>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-4 mb-4 text-center">
-                      <div>
-                        <div className="text-lg font-bold text-blue-600">{trip.likes || 0}</div>
-                        <div className="text-xs text-gray-600">Likes</div>
+                  </Card>
+                ) : myTripPosts.length === 0 ? (
+                  <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Calendar className="w-8 h-8 text-gray-400" />
                       </div>
-                      <div>
-                        <div className="text-lg font-bold text-green-600">{trip.comments || 0}</div>
-                        <div className="text-xs text-gray-600">Comments</div>
-                      </div>
-                      <div>
-                        <div className="text-lg font-bold text-purple-600">{trip.tags?.length || 0}</div>
-                        <div className="text-xs text-gray-600">Tags</div>
-                      </div>
-                    </div>
-
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="flex-1"
-                        onClick={() => handleViewTripDetails(trip._id)}
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        View Details
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleEditTrip(trip._id)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleDeleteTrip(trip._id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">No Trip Posts Yet</h4>
+                      <p className="text-gray-600 mb-4">
+                        You haven't posted any trips yet. Start creating your own travel plans!
+                      </p>
+                      <Button onClick={() => setShowCreateTrip(true)} className="bg-orange-500 hover:bg-orange-600">
+                        Create New Trip
                       </Button>
                     </div>
                   </Card>
-                ))}
-              </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {myTripPosts.map((trip) => (
+                      <Card key={trip._id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="text-lg font-semibold text-gray-900">{trip.content}</h4>
+                            <p className="text-sm text-gray-600">{trip.destination}</p>
+                            <p className="text-xs text-gray-500">{trip.travelDate}</p>
+                          </div>
+                          <Badge variant="default">
+                            Active
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4 mb-4 text-center">
+                          <div>
+                            <div className="text-lg font-bold text-blue-600">{trip.likes || 0}</div>
+                            <div className="text-xs text-gray-600">Likes</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-green-600">{trip.comments || 0}</div>
+                            <div className="text-xs text-gray-600">Comments</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-bold text-purple-600">{trip.tags?.length || 0}</div>
+                            <div className="text-xs text-gray-600">Tags</div>
+                          </div>
+                        </div>
+
+                        <div className="flex space-x-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleViewTripDetails(trip._id, 'travel_post')}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            View Details
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditTrip(trip._id)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeleteTrip(trip._id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
@@ -1295,6 +1388,23 @@ const UserDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Verification Modal */}
+      <VerificationModal
+        isOpen={showVerificationModal}
+        onClose={() => setShowVerificationModal(false)}
+        userEmail={user?.email || ''}
+        onVerificationComplete={handleVerificationComplete}
+      />
+
+      {/* Trip Detail Modal */}
+      <TripDetailModal
+        isOpen={showTripDetailModal}
+        onClose={() => setShowTripDetailModal(false)}
+        tripId={selectedTripId}
+        tripType={selectedTripType}
+        userEmail={user?.email || ''}
+      />
     </div>
   );
 };

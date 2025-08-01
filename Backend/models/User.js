@@ -28,11 +28,17 @@ const userSchema = new mongoose.Schema({
   },
   aadharNumber: {
     type: String,
-    required: function() { return this.isVerified; }
+    required: function() { 
+      // Only required if user is verified AND has gone through verification process
+      return this.isVerified && this.aadharCardImage; 
+    }
   },
   aadharCardImage: {
     type: String, // URL to stored image
-    required: function() { return this.isVerified; }
+    required: function() { 
+      // Only required if user is verified AND has gone through verification process
+      return this.isVerified && this.aadharNumber; 
+    }
   },
   verificationRequestedBy: [{
     tripOwnerId: String,

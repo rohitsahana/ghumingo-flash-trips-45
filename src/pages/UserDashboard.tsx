@@ -37,13 +37,15 @@ const UserDashboard = () => {
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
   const [interestedTrips, setInterestedTrips] = useState([]);
   const [loadingInterestedTrips, setLoadingInterestedTrips] = useState(false);
+  const [myTripPosts, setMyTripPosts] = useState([]);
+  const [loadingMyTrips, setLoadingMyTrips] = useState(false);
 
-  // Mock data
+  // Dynamic stats based on actual data
   const userStats = {
-    totalTrips: 8,
-    totalViews: 1247,
-    totalInterests: 89,
-    totalMessages: 156,
+    totalTrips: myTripPosts.length,
+    totalViews: myTripPosts.reduce((sum, trip) => sum + (trip.likes || 0), 0),
+    totalInterests: myTripPosts.reduce((sum, trip) => sum + (trip.comments || 0), 0),
+    totalMessages: 156, // Keep this as is since we don't have message data yet
     rating: 4.8,
     followers: 234
   };
@@ -203,6 +205,8 @@ const UserDashboard = () => {
       title: "Trip Created",
       description: "Your trip has been added to the list",
     });
+    // Refresh the trip posts list
+    fetchMyTripPosts();
   };
 
   // Function to fetch interested trips
@@ -232,6 +236,38 @@ const UserDashboard = () => {
   useEffect(() => {
     fetchInterestedTrips();
   }, [user?.id]);
+
+  // Function to fetch user's trip posts
+  const fetchMyTripPosts = async () => {
+    if (!user?.email) return;
+    
+    setLoadingMyTrips(true);
+    try {
+      const response = await fetch(`http://localhost:6080/api/travelposts`);
+      if (response.ok) {
+        const allPosts = await response.json();
+        // Filter posts created by the current user
+        const myPosts = allPosts.filter(post => 
+          post.author.name === user.email || 
+          post.author.email === user.email
+        );
+        setMyTripPosts(myPosts);
+      } else {
+        console.error('Failed to fetch trip posts');
+        setMyTripPosts([]);
+      }
+    } catch (error) {
+      console.error('Error fetching trip posts:', error);
+      setMyTripPosts([]);
+    } finally {
+      setLoadingMyTrips(false);
+    }
+  };
+
+  // Load user's trip posts when component mounts
+  useEffect(() => {
+    fetchMyTripPosts();
+  }, [user?.email]);
 
   const handleViewTripDetails = (tripId: string) => {
     // Navigate to the trip detail page
@@ -561,63 +597,87 @@ const UserDashboard = () => {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tripPosts.map((trip) => (
-                <Card key={trip.id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-900">{trip.title}</h4>
-                      <p className="text-sm text-gray-600">{trip.destination}</p>
-                      <p className="text-xs text-gray-500">{trip.date}</p>
-                    </div>
-                    <Badge variant={trip.status === 'active' ? 'default' : 'secondary'}>
-                      {trip.status}
-                    </Badge>
+            {loadingMyTrips ? (
+              <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Loading your trip posts...</p>
+                </div>
+              </Card>
+            ) : myTripPosts.length === 0 ? (
+              <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-gray-400" />
                   </div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Trip Posts Yet</h4>
+                  <p className="text-gray-600 mb-4">
+                    You haven't posted any trips yet. Start creating your own travel plans!
+                  </p>
+                  <Button onClick={() => setShowCreateTrip(true)} className="bg-orange-500 hover:bg-orange-600">
+                    Create New Trip
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {myTripPosts.map((trip) => (
+                  <Card key={trip._id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900">{trip.content}</h4>
+                        <p className="text-sm text-gray-600">{trip.destination}</p>
+                        <p className="text-xs text-gray-500">{trip.travelDate}</p>
+                      </div>
+                      <Badge variant="default">
+                        Active
+                      </Badge>
+                    </div>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4 text-center">
-                    <div>
-                      <div className="text-lg font-bold text-blue-600">{trip.views}</div>
-                      <div className="text-xs text-gray-600">Views</div>
+                    <div className="grid grid-cols-3 gap-4 mb-4 text-center">
+                      <div>
+                        <div className="text-lg font-bold text-blue-600">{trip.likes || 0}</div>
+                        <div className="text-xs text-gray-600">Likes</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-green-600">{trip.comments || 0}</div>
+                        <div className="text-xs text-gray-600">Comments</div>
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold text-purple-600">{trip.tags?.length || 0}</div>
+                        <div className="text-xs text-gray-600">Tags</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-lg font-bold text-green-600">{trip.interests}</div>
-                      <div className="text-xs text-gray-600">Interests</div>
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold text-purple-600">{trip.messages}</div>
-                      <div className="text-xs text-gray-600">Messages</div>
-                    </div>
-                  </div>
 
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleViewTripDetails(trip.id)}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View Details
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleEditTrip(trip.id)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDeleteTrip(trip.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleViewTripDetails(trip._id)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View Details
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleEditTrip(trip._id)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteTrip(trip._id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Interested Trips Tab */}

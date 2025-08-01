@@ -2,12 +2,18 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Users, MapPin, Zap } from "lucide-react";
+import { Clock, Users, MapPin, Zap, MessageSquare, Send } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const FlashTripRooms = () => {
 const [tripRooms, setTripRooms] = useState(null);
 const [loading, setIsLoading] = useState(true);
+const [joinedRooms, setJoinedRooms] = useState(new Set());
+const [showChat, setShowChat] = useState(false);
+const [chatMessage, setChatMessage] = useState('');
+const [selectedRoom, setSelectedRoom] = useState(null);
 
 useEffect(() => {
   const fetchRooms = async () => {
@@ -92,7 +98,11 @@ if (loading) {
 
         {/* Trip Rooms Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {tripRooms.map((room) => (
+          {tripRooms.map((room) => {
+            const isJoined = joinedRooms.has(room._id);
+            const updatedSpotsLeft = isJoined ? room.spotsLeft - 1 : room.spotsLeft;
+            
+            return (
             <Card key={room._id} className="p-6 bg-white/70 backdrop-blur-sm border-orange-100 hover:shadow-lg transition-all hover:scale-105">
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-bold text-gray-900">{room.destination}</h3>
@@ -105,7 +115,7 @@ if (loading) {
               <div className="space-y-3 mb-4">
                 <div className="flex items-center text-gray-600">
                   <Users className="w-4 h-4 mr-2" />
-                  <span className="font-semibold text-orange-600">{room.spotsLeft} spots left</span>
+                  <span className="font-semibold text-orange-600">{updatedSpotsLeft} spots left</span>
                   <span className="ml-1">of {room.totalSpots}</span>
                 </div>
 
@@ -136,12 +146,31 @@ if (loading) {
                 </div>
 
                 <div className="flex gap-2">
-                  <Link to={`/trip-room/${room.id}`} className="flex-1">
-                    <Button className="w-full bg-orange-500 hover:bg-orange-600">
+                  {isJoined ? (
+                    <>
+                      <Button 
+                        className="w-full bg-green-500 hover:bg-green-600"
+                        onClick={() => {
+                          setSelectedRoom(room);
+                          setShowChat(true);
+                        }}
+                      >
+                        <Zap className="w-4 h-4 mr-2" />
+                        Chat with Group
+                      </Button>
+                    </>
+                  ) : (
+                    <Button 
+                      className="w-full bg-orange-500 hover:bg-orange-600"
+                      onClick={() => {
+                        setJoinedRooms(prev => new Set([...prev, room._id]));
+                      }}
+                      disabled={updatedSpotsLeft === 0}
+                    >
                       <Zap className="w-4 h-4 mr-2" />
-                      Join Room
+                      {updatedSpotsLeft === 0 ? 'Room Full' : 'Join Room'}
                     </Button>
-                  </Link>
+                  )}
                 </div>
 
                 <p className="text-xs text-red-600 mt-2 text-center">
@@ -149,8 +178,8 @@ if (loading) {
                 </p>
               </div>
             </Card>
-            // <div>{room.id}</div>
-          ))}
+          );
+        })}
         </div>
 
         {/* Create Room CTA */}
@@ -166,6 +195,63 @@ if (loading) {
           </Button>
         </Card>
       </div>
+
+      {/* Chat Dialog */}
+      <Dialog open={showChat} onOpenChange={setShowChat}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedRoom ? `Chat - ${selectedRoom.destination}` : 'Group Chat'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-gray-50 p-4 rounded-lg h-64 overflow-y-auto">
+              <div className="space-y-2">
+                <div className="flex justify-end">
+                  <div className="bg-blue-500 text-white p-2 rounded-lg max-w-xs">
+                    <p className="text-sm">Hi everyone! Excited to join this trip! 🎉</p>
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="bg-gray-200 p-2 rounded-lg max-w-xs">
+                    <p className="text-sm">Welcome! We're glad to have you on board! 👋</p>
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="bg-gray-200 p-2 rounded-lg max-w-xs">
+                    <p className="text-sm">Let's discuss the itinerary and meeting point.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex space-x-2">
+              <Input
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Type your message..."
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter' && chatMessage.trim()) {
+                    // Handle send message
+                    setChatMessage('');
+                  }
+                }}
+              />
+              <Button 
+                onClick={() => {
+                  if (chatMessage.trim()) {
+                    // Handle send message
+                    setChatMessage('');
+                  }
+                }}
+                disabled={!chatMessage.trim()}
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -49,7 +49,7 @@ const TravelFeed = () => {
       {/* Conditionally Render the Form */}
       {showForm && (
         <div className="mt-6">
-          <TravelPostForm  setShowForm={setShowForm} />
+          <TravelPostForm onSuccess={() => setShowForm(false)} />
         </div>
       )}
     </div>

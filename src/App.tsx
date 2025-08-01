@@ -15,6 +15,9 @@ import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import TravelPlans from "./pages/TravelPlans";
 import TripRoomForm from "./components/ui/tripRoomForm";
+import TravelAgentOnboarding from "./pages/TravelAgentOnboarding";
+import TravelAgentDashboard from "./pages/TravelAgentDashboard";
+import CreateTravelPackage from "./pages/CreateTravelPackage";
 
 const queryClient = new QueryClient();
 
@@ -35,7 +38,10 @@ const App = () => (
             <Route path="/messaging/:userId" element={<Messaging />} />
             <Route path="/profile/:userId" element={<Profile />} />
             <Route path="/travel-plans" element={<TravelPlans />} />
-             <Route path="/flash-trip-rooms/new" element={<TripRoomForm />} />
+            <Route path="/flash-trip-rooms/new" element={<TripRoomForm />} />
+            <Route path="/travel-agent/onboarding" element={<TravelAgentOnboarding />} />
+            <Route path="/travel-agent/dashboard" element={<TravelAgentDashboard />} />
+            <Route path="/travel-agent/create-package" element={<CreateTravelPackage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

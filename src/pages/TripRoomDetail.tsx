@@ -278,7 +278,7 @@ if (loading) {
                     </div>
                   </div>
               </div>
-              <Link to={`/profile/${tripRoom.organizer.name.replace(/\s+/g, '-').toLowerCase()}`}>
+              <Link to={`/profile/${tripRoom.organizer.userId || tripRoom.organizer.name.replace(/\s+/g, '-').toLowerCase()}`}>
                 <Button variant="outline" className="w-full">
                   View Profile
                 </Button>

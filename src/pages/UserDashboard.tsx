@@ -50,6 +50,9 @@ const UserDashboard = () => {
     isVerified: false,
     email: user?.email || ''
   });
+  const [isTravelAgent, setIsTravelAgent] = useState(false);
+  const [agentTrips, setAgentTrips] = useState([]);
+  const [loadingAgentTrips, setLoadingAgentTrips] = useState(false);
 
   // Dynamic stats based on actual data
   const userStats = {
@@ -188,7 +191,10 @@ const UserDashboard = () => {
 
   // Load interested trips when component mounts
   useEffect(() => {
+    checkVerificationStatus();
+    checkTravelAgentStatus();
     fetchInterestedTrips();
+    fetchMyTripPosts();
   }, [user?.email]);
 
   // Function to fetch user's trip posts
@@ -273,6 +279,40 @@ const UserDashboard = () => {
       }
     } catch (error) {
       console.error('Failed to check verification status:', error);
+    }
+  };
+
+  const checkTravelAgentStatus = async () => {
+    if (!user?.email) return;
+    
+    try {
+      const response = await fetch(`http://localhost:6080/api/travel-agents/status/${user.email}`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsTravelAgent(data.isApproved);
+        if (data.isApproved) {
+          fetchAgentTrips();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to check travel agent status:', error);
+    }
+  };
+
+  const fetchAgentTrips = async () => {
+    if (!user?.email) return;
+    
+    setLoadingAgentTrips(true);
+    try {
+      const response = await fetch(`http://localhost:6080/api/travel-agents/dashboard/${user.email}`);
+      if (response.ok) {
+        const data = await response.json();
+        setAgentTrips(data.travelPlans || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch agent trips:', error);
+    } finally {
+      setLoadingAgentTrips(false);
     }
   };
 
@@ -497,10 +537,11 @@ const UserDashboard = () => {
 
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className={`grid w-full ${isTravelAgent ? 'grid-cols-7' : 'grid-cols-6'}`}>
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="my-trips">My Trips</TabsTrigger>
             <TabsTrigger value="interested-trips">Interested Trips</TabsTrigger>
+            {isTravelAgent && <TabsTrigger value="agent-trips">Agent Trips</TabsTrigger>}
             <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
@@ -838,6 +879,104 @@ const UserDashboard = () => {
               </div>
             )}
           </TabsContent>
+
+          {/* Agent Trips Tab */}
+          {isTravelAgent && (
+            <TabsContent value="agent-trips" className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-bold text-gray-900">My Travel Plans</h3>
+                <Button 
+                  className="bg-blue-500 hover:bg-blue-600"
+                  onClick={() => setShowCreateTrip(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New Plan
+                </Button>
+              </div>
+
+              {loadingAgentTrips ? (
+                <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                    <p className="mt-2 text-gray-600">Loading your travel plans...</p>
+                  </div>
+                </Card>
+              ) : agentTrips.length === 0 ? (
+                <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                  <div className="text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Calendar className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-2">No Travel Plans Yet</h4>
+                    <p className="text-gray-600 mb-4">
+                      You haven't created any travel plans yet. Start planning your next adventure!
+                    </p>
+                    <Button onClick={() => setShowCreateTrip(true)} className="bg-blue-500 hover:bg-blue-600">
+                      Create New Plan
+                    </Button>
+                  </div>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {agentTrips.map((trip) => (
+                    <Card key={trip._id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900">{trip.title}</h4>
+                          <p className="text-sm text-gray-600">{trip.destination}</p>
+                          <p className="text-xs text-gray-500">{trip.travelDate}</p>
+                        </div>
+                        <Badge variant="default">
+                          Active
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-4 mb-4 text-center">
+                        <div>
+                          <div className="text-lg font-bold text-blue-600">{trip.likes || 0}</div>
+                          <div className="text-xs text-gray-600">Likes</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-green-600">{trip.comments || 0}</div>
+                          <div className="text-xs text-gray-600">Comments</div>
+                        </div>
+                        <div>
+                          <div className="text-lg font-bold text-purple-600">{trip.tags?.length || 0}</div>
+                          <div className="text-xs text-gray-600">Tags</div>
+                        </div>
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => handleViewTripDetails(trip._id, 'travel_plan')}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          View Details
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditTrip(trip._id)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteTrip(trip._id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
+          )}
 
           {/* Messages Tab */}
           <TabsContent value="messages" className="space-y-6">

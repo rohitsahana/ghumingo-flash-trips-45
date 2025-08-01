@@ -191,8 +191,8 @@ const TravelAgentOnboarding = () => {
       if (response.ok) {
         const data = await response.json();
         toast({
-          title: "Application Submitted!",
-          description: data.message,
+          title: "Registration Successful!",
+          description: "Your travel agent account has been verified and approved immediately. You can now access your dashboard!",
         });
         navigate('/travel-agent/dashboard');
       } else {

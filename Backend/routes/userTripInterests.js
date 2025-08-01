@@ -1,6 +1,5 @@
 import express from 'express';
 import UserTripInterest from '../models/UserTripInterest.js';
-import TravelPlan from '../models/TravelPlan.js';
 import TripRoom from '../models/TripRoom.js';
 import TravelPost from '../models/TravelPost.js';
 
@@ -19,7 +18,14 @@ router.get('/user/:userId', async (req, res) => {
         
         switch (interest.tripType) {
           case 'travel_plan':
-            tripDetails = await TravelPlan.findById(interest.tripId);
+            // For now, return mock data for travel plans
+            tripDetails = {
+              title: 'Travel Plan',
+              destination: 'Unknown',
+              duration: 'Unknown',
+              cost: { amount: 0, currency: 'INR' },
+              organizer: { name: 'Travel Agent', verified: true }
+            };
             break;
           case 'trip_room':
             tripDetails = await TripRoom.findById(interest.tripId);

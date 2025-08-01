@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const travelPlanSchema = new mongoose.Schema({
   title: String,
@@ -20,4 +20,4 @@ const travelPlanSchema = new mongoose.Schema({
   notIncluded: Array,
 });
 
-module.exports = mongoose.model('TravelPlan', travelPlanSchema); 
+export default mongoose.model('TravelPlan', travelPlanSchema); 

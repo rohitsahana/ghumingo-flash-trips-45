@@ -28,10 +28,20 @@ router.get('/user/:userId', async (req, res) => {
             };
             break;
           case 'trip_room':
-            tripDetails = await TripRoom.findById(interest.tripId);
+            try {
+              tripDetails = await TripRoom.findById(interest.tripId);
+            } catch (error) {
+              console.error('Error finding trip room:', error);
+              tripDetails = null;
+            }
             break;
           case 'travel_post':
-            tripDetails = await TravelPost.findById(interest.tripId);
+            try {
+              tripDetails = await TravelPost.findById(interest.tripId);
+            } catch (error) {
+              console.error('Error finding travel post:', error);
+              tripDetails = null;
+            }
             break;
         }
         

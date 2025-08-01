@@ -3,12 +3,72 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, MessageSquare, MapPin, Calendar } from "lucide-react";
+import { Heart, MessageSquare, MapPin, Calendar, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 
 
 const TravelPost = (posts) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [showingInterest, setShowingInterest] = useState(false);
+  const [hasShownInterest, setHasShownInterest] = useState(false);
+
+  const handleShowInterest = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to show interest in trips",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowingInterest(true);
+    try {
+      const response = await fetch('http://localhost:6080/api/user-trip-interests/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          tripId: posts.id || posts._id,
+          tripType: 'travel_post',
+          organizerId: posts.author?.id || 'unknown',
+          message: `Interested in joining this trip to ${posts.destination}`
+        })
+      });
+
+      if (response.ok) {
+        setHasShownInterest(true);
+        toast({
+          title: "Interest Shown!",
+          description: "Your interest has been recorded. The organizer will be notified.",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to show interest",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to show interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to show interest. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setShowingInterest(false);
+    }
+  };
+
   // console.log("TravelPost component received posts:", posts,posts.author);
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -84,11 +144,22 @@ const TravelPost = (posts) => {
               {posts.comments}
             </Button>
           </div>
-          <Link to="/communities">
-            <Button size="sm" className="bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white">
-              Join Trip
+          {hasShownInterest ? (
+            <Button size="sm" disabled className="bg-green-500 text-white">
+              <UserPlus className="w-4 h-4 mr-1" />
+              Interest Shown
             </Button>
-          </Link>
+          ) : (
+            <Button 
+              size="sm" 
+              className="bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white"
+              onClick={handleShowInterest}
+              disabled={showingInterest}
+            >
+              <UserPlus className="w-4 h-4 mr-1" />
+              {showingInterest ? 'Showing Interest...' : 'Show Interest'}
+            </Button>
+          )}
         </div>
       </div>
     </Card>

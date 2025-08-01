@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MapPin, Clock, Users, Star } from "lucide-react";
+import { MapPin, Clock, Users, Star, UserPlus } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface TripRoomProps {
   id: string;
@@ -26,7 +28,63 @@ interface TripRoomProps {
 }
 
 const TripRoom = (room) => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [timeLeft, setTimeLeft] = useState(room.expiresIn * 3600); // Convert hours to seconds
+  const [showingInterest, setShowingInterest] = useState(false);
+  const [hasShownInterest, setHasShownInterest] = useState(false);
+
+  const handleShowInterest = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to show interest in trips",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowingInterest(true);
+    try {
+      const response = await fetch('http://localhost:6080/api/user-trip-interests/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          tripId: room.id || room._id,
+          tripType: 'trip_room',
+          organizerId: room.organizer?.id || 'unknown',
+          message: `Interested in joining this trip to ${room.destination}`
+        })
+      });
+
+      if (response.ok) {
+        setHasShownInterest(true);
+        toast({
+          title: "Interest Shown!",
+          description: "Your interest has been recorded. The organizer will be notified.",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to show interest",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to show interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to show interest. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setShowingInterest(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -121,15 +179,33 @@ const TripRoom = (room) => {
         </div>
       </div>
 
-      {/* Action button */}
-      <Link to={`/trip-room/${room.id}`}>
-        <Button 
-          className="w-full bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
-          disabled={room.spotsLeft === 0}
-        >
-          {room.spotsLeft === 0 ? "Trip Full" : `Join Trip (${room.spotsLeft} spots left)`}
-        </Button>
-      </Link>
+      {/* Action buttons */}
+      <div className="flex space-x-2">
+        <Link to={`/trip-room/${room.id}`} className="flex-1">
+          <Button 
+            variant="outline"
+            className="w-full font-semibold py-3"
+            disabled={room.spotsLeft === 0}
+          >
+            {room.spotsLeft === 0 ? "Trip Full" : `View Details`}
+          </Button>
+        </Link>
+        {hasShownInterest ? (
+          <Button disabled className="bg-green-500 text-white">
+            <UserPlus className="w-4 h-4 mr-1" />
+            Interest Shown
+          </Button>
+        ) : (
+          <Button 
+            className="bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 text-white font-semibold py-3"
+            onClick={handleShowInterest}
+            disabled={showingInterest || room.spotsLeft === 0}
+          >
+            <UserPlus className="w-4 h-4 mr-1" />
+            {showingInterest ? 'Showing Interest...' : 'Show Interest'}
+          </Button>
+        )}
+      </div>
     </Card>
   );
 };

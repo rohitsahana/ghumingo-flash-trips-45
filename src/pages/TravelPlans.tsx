@@ -4,9 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, MapPin, Calendar, Star, CheckCircle } from 'lucide-react';
+import { Users, MapPin, Calendar, Star, CheckCircle, UserPlus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import TravelAgentPartnership from '@/components/TravelAgentPartnership';
+import { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -17,9 +20,64 @@ const formatCurrency = (amount: number) =>
 
 const TravelPlans = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [showingInterest, setShowingInterest] = useState<string | null>(null);
 
   const handleCardClick = (planId: string) => {
     navigate(`/travel-plan-booking/${planId}`);
+  };
+
+  const handleShowInterest = async (planId: string) => {
+    if (!user?.id) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to show interest in trips",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setShowingInterest(planId);
+    try {
+      const plan = travelPlans.find(p => p.id === planId);
+      const response = await fetch('http://localhost:6080/api/user-trip-interests/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          tripId: planId,
+          tripType: 'travel_plan',
+          organizerId: plan?.contact?.organizer || 'unknown',
+          message: `Interested in joining this trip to ${plan?.destination}`
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Interest Shown!",
+          description: "Your interest has been recorded. The organizer will be notified.",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to show interest",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to show interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to show interest. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setShowingInterest(null);
+    }
   };
 
   return (
@@ -284,7 +342,16 @@ const TravelPlans = () => {
                       </div>
                     </TabsContent>
                   </Tabs>
-                  <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+                  <div className="flex justify-between mt-6 pt-4 border-t border-gray-200">
+                    <Button 
+                      onClick={() => handleShowInterest(plan.id)}
+                      disabled={showingInterest === plan.id}
+                      variant="outline"
+                      className="border-orange-500 text-orange-600 hover:bg-orange-50"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      {showingInterest === plan.id ? 'Showing Interest...' : 'Show Interest'}
+                    </Button>
                     <Button 
                       onClick={() => {
                         handleCardClick(plan.id);

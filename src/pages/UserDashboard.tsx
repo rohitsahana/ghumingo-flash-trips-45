@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import CreateTripForm from "@/components/CreateTripForm";
@@ -20,6 +20,7 @@ import CreateTripForm from "@/components/CreateTripForm";
 const UserDashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('overview');
   const [showSupportDialog, setShowSupportDialog] = useState(false);
@@ -34,6 +35,8 @@ const UserDashboard = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showPrivacySettings, setShowPrivacySettings] = useState(false);
   const [showNotificationSettings, setShowNotificationSettings] = useState(false);
+  const [interestedTrips, setInterestedTrips] = useState([]);
+  const [loadingInterestedTrips, setLoadingInterestedTrips] = useState(false);
 
   // Mock data
   const userStats = {
@@ -110,6 +113,62 @@ const UserDashboard = () => {
     }
   ];
 
+  // Mock data for interested trips
+  const mockInterestedTrips = [
+    {
+      id: '1',
+      tripId: 'trip1',
+      tripType: 'travel_plan',
+      status: 'accepted',
+      appliedAt: '2024-12-10T10:00:00Z',
+      respondedAt: '2024-12-11T15:30:00Z',
+      message: 'I would love to join this trip!',
+      tripDetails: {
+        title: 'Rajasthan Royal Heritage Tour',
+        destination: 'Rajasthan, India',
+        duration: '7 Days / 6 Nights',
+        cost: { amount: 46080, currency: 'INR' },
+        organizer: {
+          name: 'Royal Travel Agency',
+          verified: true
+        }
+      }
+    },
+    {
+      id: '2',
+      tripId: 'trip2',
+      tripType: 'trip_room',
+      status: 'waiting_for_approval',
+      appliedAt: '2024-12-12T14:20:00Z',
+      message: 'Interested in joining this group trip',
+      tripDetails: {
+        destination: 'Kerala Backwaters',
+        dates: 'Jan 15-20, 2025',
+        budget: '₹25,000',
+        organizer: {
+          name: 'Adventure Seeker',
+          verified: false
+        }
+      }
+    },
+    {
+      id: '3',
+      tripId: 'trip3',
+      tripType: 'travel_post',
+      status: 'pending',
+      appliedAt: '2024-12-13T09:15:00Z',
+      message: 'Looking forward to this adventure!',
+      tripDetails: {
+        destination: 'Ladakh, India',
+        travelDate: 'March 2025',
+        author: {
+          name: 'Mountain Explorer',
+          verified: true
+        }
+      }
+    }
+  ];
+
   const handleSupportSubmit = () => {
     if (!supportMessage.trim()) {
       toast({
@@ -145,6 +204,34 @@ const UserDashboard = () => {
       description: "Your trip has been added to the list",
     });
   };
+
+  // Function to fetch interested trips
+  const fetchInterestedTrips = async () => {
+    if (!user?.id) return;
+    
+    setLoadingInterestedTrips(true);
+    try {
+      const response = await fetch(`http://localhost:6080/api/user-trip-interests/user/${user.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setInterestedTrips(data);
+      } else {
+        // For now, use mock data if API fails
+        setInterestedTrips(mockInterestedTrips);
+      }
+    } catch (error) {
+      console.error('Failed to fetch interested trips:', error);
+      // Use mock data as fallback
+      setInterestedTrips(mockInterestedTrips);
+    } finally {
+      setLoadingInterestedTrips(false);
+    }
+  };
+
+  // Load interested trips when component mounts
+  useEffect(() => {
+    fetchInterestedTrips();
+  }, [user?.id]);
 
   const handleViewTripDetails = (tripId: string) => {
     // Navigate to the trip detail page
@@ -377,9 +464,10 @@ const UserDashboard = () => {
 
         {/* Main Dashboard */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="my-trips">My Trips</TabsTrigger>
+            <TabsTrigger value="interested-trips">Interested Trips</TabsTrigger>
             <TabsTrigger value="messages">Messages</TabsTrigger>
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="support">Support</TabsTrigger>
@@ -530,6 +618,129 @@ const UserDashboard = () => {
                 </Card>
               ))}
             </div>
+          </TabsContent>
+
+          {/* Interested Trips Tab */}
+          <TabsContent value="interested-trips" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-2xl font-bold text-gray-900">Trips I've Shown Interest In</h3>
+              <Badge className="bg-blue-500 text-white">
+                {interestedTrips.length} total
+              </Badge>
+            </div>
+
+            {loadingInterestedTrips ? (
+              <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Loading your interested trips...</p>
+                </div>
+              </Card>
+            ) : interestedTrips.length === 0 ? (
+              <Card className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Calendar className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No Interested Trips Yet</h4>
+                  <p className="text-gray-600 mb-4">
+                    You haven't shown interest in any trips yet. Start exploring trips from travel agents and other users!
+                  </p>
+                  <Button onClick={() => navigate('/travel-plans')} className="bg-orange-500 hover:bg-orange-600">
+                    Explore Trips
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {interestedTrips.map((trip) => (
+                  <Card key={trip.id} className="p-6 bg-white/80 backdrop-blur-sm border-orange-100">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          {trip.tripDetails?.title || trip.tripDetails?.destination || 'Trip'}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {trip.tripDetails?.destination || trip.tripDetails?.travelDate || 'Destination'}
+                        </p>
+                        {trip.tripDetails?.duration && (
+                          <p className="text-xs text-gray-500">{trip.tripDetails.duration}</p>
+                        )}
+                        {trip.tripDetails?.cost && (
+                          <p className="text-xs text-gray-500">
+                            ₹{trip.tripDetails.cost.amount?.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col items-end space-y-2">
+                        <Badge 
+                          variant={
+                            trip.status === 'accepted' ? 'default' :
+                            trip.status === 'waiting_for_approval' ? 'secondary' :
+                            trip.status === 'rejected' ? 'destructive' : 'outline'
+                          }
+                          className={
+                            trip.status === 'accepted' ? 'bg-green-500' :
+                            trip.status === 'waiting_for_approval' ? 'bg-yellow-500' :
+                            trip.status === 'rejected' ? 'bg-red-500' : ''
+                          }
+                        >
+                          {trip.status.replace('_', ' ')}
+                        </Badge>
+                        <div className="flex items-center space-x-1">
+                          {trip.tripDetails?.organizer?.verified || trip.tripDetails?.author?.verified ? (
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                              Verified
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700">
+                              Unverified
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <p className="text-sm text-gray-600 mb-2">
+                        <strong>Organizer:</strong> {trip.tripDetails?.organizer?.name || trip.tripDetails?.author?.name}
+                      </p>
+                      {trip.message && (
+                        <p className="text-sm text-gray-600 italic">"{trip.message}"</p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <span>Applied: {new Date(trip.appliedAt).toLocaleDateString()}</span>
+                      {trip.respondedAt && (
+                        <span>Responded: {new Date(trip.respondedAt).toLocaleDateString()}</span>
+                      )}
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handleViewTripDetails(trip.tripId)}
+                      >
+                        <Eye className="w-4 h-4 mr-1" />
+                        View Trip
+                      </Button>
+                      {trip.status === 'accepted' && (
+                        <Button 
+                          size="sm" 
+                          className="bg-green-500 hover:bg-green-600"
+                        >
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          Contact
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Messages Tab */}

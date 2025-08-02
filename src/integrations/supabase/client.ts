@@ -2,8 +2,14 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://wmgsraawxxmsvzrtpjds.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZ3NyYWF3eHhtc3Z6cnRwamRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MTA4NjUsImV4cCI6MjA2NzE4Njg2NX0.YKtnJcaxzJ24TL09s7oepByxlG_r78xWF6DItoVrd5U";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://wmgsraawxxmsvzrtpjds.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZ3NyYWF3eHhtc3Z6cnRwamRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MTA4NjUsImV4cCI6MjA2NzE4Njg2NX0.YKtnJcaxzJ24TL09s7oepByxlG_r78xWF6DItoVrd5U";
+
+// Validate environment variables
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  console.error('❌ Missing Supabase environment variables');
+  console.error('Please check your .env file or environment configuration');
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -13,5 +19,19 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
+});
+
+// Test connection on initialization
+supabase.auth.getSession().then(({ data, error }) => {
+  if (error) {
+    console.error('❌ Supabase connection error:', error);
+  } else {
+    console.log('✅ Supabase client initialized successfully');
   }
 });

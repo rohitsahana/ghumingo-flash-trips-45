@@ -41,21 +41,41 @@ export class ApiErrorHandler {
 
   static async fetchWithErrorHandling(
     url: string, 
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retries: number = 2
   ): Promise<any> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     try {
       const response = await fetch(url, {
         ...options,
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
         },
       });
       
+      clearTimeout(timeoutId);
       return await this.handleResponse(response);
     } catch (error) {
+      clearTimeout(timeoutId);
+      
       if (error instanceof ApiErrorHandler.ApiError) {
         throw error;
+      }
+      
+      // Handle timeout and network errors
+      if (error.name === 'AbortError') {
+        throw new ApiErrorHandler.ApiError('Request timeout', 0, 'TIMEOUT');
+      }
+      
+      // Retry logic for network errors
+      if (retries > 0 && this.isNetworkError(error)) {
+        console.log(`Retrying request... (${retries} attempts left)`);
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second before retry
+        return this.fetchWithErrorHandling(url, options, retries - 1);
       }
       
       // Network or other errors
@@ -95,6 +115,10 @@ export class ApiErrorHandler {
     return error instanceof ApiErrorHandler.ApiError && error.status >= 400 && error.status < 500;
   }
 
+  static isTimeoutError(error: any): boolean {
+    return error instanceof ApiErrorHandler.ApiError && error.code === 'TIMEOUT';
+  }
+
   // Custom error class
   static ApiError = class extends Error implements ApiError {
     status?: number;
@@ -116,27 +140,38 @@ export class ApiErrorHandler {
   };
 }
 
+// API base configuration
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:6080';
+
 // Convenience functions for common API operations
 export const api = {
-  get: (url: string, options?: RequestInit) => 
-    ApiErrorHandler.fetchWithErrorHandling(url, { ...options, method: 'GET' }),
+  get: (url: string, options?: RequestInit) => {
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    return ApiErrorHandler.fetchWithErrorHandling(fullUrl, { ...options, method: 'GET' });
+  },
   
-  post: (url: string, data?: any, options?: RequestInit) =>
-    ApiErrorHandler.fetchWithErrorHandling(url, {
+  post: (url: string, data?: any, options?: RequestInit) => {
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    return ApiErrorHandler.fetchWithErrorHandling(fullUrl, {
       ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
-    }),
+    });
+  },
   
-  put: (url: string, data?: any, options?: RequestInit) =>
-    ApiErrorHandler.fetchWithErrorHandling(url, {
+  put: (url: string, data?: any, options?: RequestInit) => {
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    return ApiErrorHandler.fetchWithErrorHandling(fullUrl, {
       ...options,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
-    }),
+    });
+  },
   
-  delete: (url: string, options?: RequestInit) =>
-    ApiErrorHandler.fetchWithErrorHandling(url, { ...options, method: 'DELETE' }),
+  delete: (url: string, options?: RequestInit) => {
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    return ApiErrorHandler.fetchWithErrorHandling(fullUrl, { ...options, method: 'DELETE' });
+  },
 };
 
 export default ApiErrorHandler; 

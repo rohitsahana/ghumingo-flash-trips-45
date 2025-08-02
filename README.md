@@ -1,75 +1,96 @@
-# 🚀 Ghumingo Flash Trips
+# Ghumingo Flash Trips - Travel Community Platform
 
-A modern travel platform connecting adventurous souls for spontaneous trips and verified travel experiences.
+A full-stack travel community platform built with React (Frontend) and Node.js/Express (Backend) with MongoDB database.
 
-## ✨ Features
+## 🚀 Quick Start
 
-- **⚡ Flash Trip Rooms**: Join spontaneous adventures with verified travelers
-- **🔐 Secure Authentication**: Supabase-powered user management
-- **📱 Responsive Design**: Works seamlessly on all devices
-- **🛡️ Trust & Safety**: Verified profiles and secure messaging
-- **🎯 Travel Stories**: Share and discover travel experiences
-- **👥 Community Groups**: Connect with like-minded travelers
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- MongoDB Atlas account (or local MongoDB)
 
-## 🛠️ Quick Start
+### Project Structure
+```
+ghumingo-flash-trips-45-1/
+├── Backend/          # Node.js/Express API server
+├── src/             # React frontend application
+├── package.json     # Frontend dependencies
+└── README.md        # This file
+```
 
-### Option 1: Automated Setup (Recommended)
+## 📋 Setup Instructions
 
+### 1. Clone the Repository
 ```bash
-# Clone the repository
 git clone <your-repo-url>
-cd ghumingo-flash-trips-45-4
-
-# Run the automated setup script
-./start.sh
+cd ghumingo-flash-trips-45-1
 ```
 
-This script will:
-- ✅ Install all dependencies
-- ✅ Create environment files
-- ✅ Start both frontend and backend servers
-- ✅ Verify all services are running
-
-### Option 2: Manual Setup
-
-#### 1. Install Dependencies
-
+### 2. Backend Setup
 ```bash
-# Frontend dependencies
-npm install
-
-# Backend dependencies
+# Navigate to backend directory
 cd Backend
+
+# Install dependencies
 npm install
-cd ..
-```
 
-#### 2. Environment Configuration
-
-Create `.env` in the root directory:
-```env
-VITE_API_URL=http://localhost:6080
-VITE_SUPABASE_URL=https://wmgsraawxxmsvzrtpjds.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZ3NyYWF3eHhtc3Z6cnRwamRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MTA4NjUsImV4cCI6MjA2NzE4Njg2NX0.YKtnJcaxzJ24TL09s7oepByxlG_r78xWF6DItoVrd5U
-```
-
-Create `Backend/.env`:
-```env
+# Create .env file (if not exists)
+# The .env file should contain:
 PORT=6080
 MONGODB_URI=mongodb+srv://Preet:dejavu@preetsingh.a0rfk.mongodb.net/
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:8080
+
+# Start the backend server
+npm start
 ```
 
-#### 3. Start Servers
-
+### 3. Frontend Setup
 ```bash
-# Terminal 1: Start backend
+# Navigate back to root directory
+cd ..
+
+# Install frontend dependencies
+npm install
+
+# Start the frontend development server
+npm run dev
+```
+
+## 🔄 How to Start After Closing Cursor
+
+### Option 1: Manual Start (Recommended for development)
+
+#### Start Backend:
+```bash
+# Open terminal in project root
 cd Backend
 npm start
+```
 
-# Terminal 2: Start frontend
+#### Start Frontend (in a new terminal):
+```bash
+# Open another terminal in project root
 npm run dev
+```
+
+### Option 2: Using the Startup Script
+
+I've created a startup script for convenience:
+
+```bash
+# Make the script executable (first time only)
+chmod +x start.sh
+
+# Run both backend and frontend
+./start.sh
+```
+
+### Option 3: Using npm scripts (if added to root package.json)
+
+```bash
+# Start both services
+npm run start:all
 ```
 
 ## 🌐 Access Points
@@ -78,156 +99,95 @@ npm run dev
 - **Backend API**: http://localhost:6080
 - **Health Check**: http://localhost:6080/api/health
 
+## 📡 API Endpoints
+
+### Available Routes:
+- `GET /api/health` - Health check
+- `GET /api/profile` - User profiles
+- `GET /api/stories` - Travel stories
+- `GET /api/travelposts` - Travel posts
+- `GET /api/triprooms` - Trip rooms
+- `GET /api/user-trip-interests` - User trip interests
+- `GET /api/user-verification` - User verification
+- `GET /api/travel-agents` - Travel agents
+- `GET /api/bookings` - Bookings
+
 ## 🔧 Troubleshooting
 
-### Common Issues
+### Backend Issues:
+1. **Port already in use**: Kill the process using port 6080
+   ```bash
+   lsof -i :6080
+   kill -9 <PID>
+   ```
 
-#### 1. Port Already in Use
-```bash
-# Check what's using the port
-lsof -i :8080
-lsof -i :6080
+2. **MongoDB connection failed**: Check your `.env` file and MongoDB Atlas connection string
 
-# Kill the process
-kill -9 <PID>
+3. **Dependencies missing**: Run `npm install` in the Backend directory
+
+### Frontend Issues:
+1. **Port already in use**: The frontend will automatically use the next available port
+2. **Dependencies missing**: Run `npm install` in the root directory
+
+## 📝 Environment Variables
+
+### Backend (.env in Backend directory):
+```env
+PORT=6080
+MONGODB_URI=mongodb+srv://Preet:dejavu@preetsingh.a0rfk.mongodb.net/
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:8080
 ```
 
-#### 2. MongoDB Connection Issues
-- Verify the MongoDB connection string in `Backend/.env`
-- Check if the MongoDB cluster is accessible
-- Ensure network connectivity
+## 🛠️ Development
 
-#### 3. Supabase Connection Issues
-- Verify Supabase credentials in `.env`
-- Check if the Supabase project is active
-- Review browser console for connection errors
+### Backend Development:
+- Server runs on port 6080
+- Auto-restart on file changes (if using nodemon)
+- MongoDB connection with error handling
+- CORS configured for frontend
 
-#### 4. TypeScript Compilation Errors
-```bash
-# Clear TypeScript cache
-rm -rf node_modules/.cache
-npm run dev
-```
+### Frontend Development:
+- Vite dev server on port 8080
+- Hot module replacement
+- TypeScript support
+- Tailwind CSS for styling
 
-#### 5. API Connection Issues
-- Ensure backend is running on port 6080
-- Check CORS configuration
-- Verify API endpoints are accessible
+## 📦 Dependencies
 
-### Health Checks
+### Backend Dependencies:
+- Express.js
+- MongoDB/Mongoose
+- CORS
+- dotenv
+- body-parser
 
-#### Backend Health
-```bash
-curl http://localhost:6080/api/health
-```
-Expected response: `{"status":"OK","timestamp":"..."}`
+### Frontend Dependencies:
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Shadcn/ui components
 
-#### Frontend Health
-```bash
-curl http://localhost:8080
-```
-Should return the HTML page
+## 🚀 Deployment
 
-#### Supabase Health
-Check browser console for:
-- ✅ Supabase client initialized successfully
-- ❌ Supabase connection error: [error details]
+### Backend Deployment:
+1. Set production environment variables
+2. Use PM2 or similar process manager
+3. Configure reverse proxy (nginx)
 
-## 🏗️ Project Structure
+### Frontend Deployment:
+1. Build the project: `npm run build`
+2. Deploy to Vercel, Netlify, or similar
 
-```
-ghumingo-flash-trips-45-4/
-├── src/                    # Frontend source code
-│   ├── components/        # React components
-│   ├── pages/            # Page components
-│   ├── contexts/         # React contexts
-│   ├── utils/            # Utility functions
-│   └── integrations/     # External integrations
-├── Backend/              # Backend server
-│   ├── models/           # MongoDB models
-│   ├── routes/           # API routes
-│   └── server.js         # Express server
-├── public/               # Static assets
-└── docs/                 # Documentation
-```
+## 📞 Support
 
-## 🛡️ Error Handling
-
-The application includes comprehensive error handling:
-
-- **API Errors**: Automatic retry with fallback data
-- **Network Issues**: Graceful degradation with cached content
-- **Component Errors**: Error boundaries prevent app crashes
-- **Authentication Errors**: Clear user feedback and recovery options
-
-## 🔄 Development Workflow
-
-1. **Start Development**: `./start.sh` or manual setup
-2. **Make Changes**: Edit files in `src/` or `Backend/`
-3. **Test Changes**: Check browser and terminal for errors
-4. **Health Check**: Verify all endpoints are working
-5. **Commit Changes**: Use conventional commit messages
-
-## 📊 Monitoring
-
-### Development Monitoring
-- Browser console shows connection status
-- Terminal displays server logs
-- Health endpoints provide service status
-
-### Performance Monitoring
-- Memory usage tracking
-- API response time monitoring
-- Error rate tracking
-
-## 🚀 Production Deployment
-
-### Frontend (Vite)
-```bash
-npm run build
-```
-
-### Backend (Node.js)
-```bash
-cd Backend
-npm start
-```
-
-### Environment Variables
-Ensure all environment variables are set for production:
-- Database connection strings
-- API endpoints
-- Authentication credentials
-- CORS origins
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-If you encounter issues:
-
-1. Check the troubleshooting guide above
-2. Review the browser console for errors
-3. Check server logs in the terminal
-4. Verify all environment variables are set
-5. Test health endpoints
-
-For additional help, please create an issue with:
-- Error messages
-- Steps to reproduce
-- Environment details
-- Browser/OS information
+If you encounter any issues:
+1. Check the console logs for both backend and frontend
+2. Verify all environment variables are set correctly
+3. Ensure MongoDB connection is working
+4. Check if all dependencies are installed
 
 ---
 
-**Happy Traveling! 🌍✈️**
+**Happy Coding! 🎉**

@@ -6,19 +6,25 @@ import { useEffect, useState } from "react";
 import TravelPostForm from "./ui/TravelPostForm";
 
 const TravelFeed = () => {
-   const [posts, setPosts] = useState([]);
+   const [posts, setPosts] = useState<any[]>([]);
  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
-    const res = await fetch(`http://localhost:6080/api/travelposts/`);
-    const data = await res.json();
-    console.log("Fetched trip rooms:", data,res);
-    setPosts(data);
-  };
-  // setIsLoading(false);
-  fetchPosts();
-      // console.log("Fetched travel posts:", posts);
+      try {
+        const res = await fetch(`http://localhost:6080/api/travelposts/`);
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        console.log("Fetched travel posts:", data);
+        setPosts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching travel posts:", error);
+        setPosts([]);
+      }
+    };
+    fetchPosts();
   }, []);
   return (
     <div id="travel-stories" className="py-16 bg-white">
@@ -33,8 +39,8 @@ const TravelFeed = () => {
         </div>
 
         <div className="max-w-2xl mx-auto space-y-8">
-          {posts.map((post) => (
-            <TravelPost {...post} />
+          {posts.map((post, index) => (
+            <TravelPost key={post.id || post._id || index} {...post} />
           ))}
         </div>
 <div className="p-6 text-center">

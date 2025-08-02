@@ -27,7 +27,7 @@ interface TripRoomProps {
   price: number;
 }
 
-const TripRoom = (room) => {
+const TripRoom = (room: TripRoomProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [timeLeft, setTimeLeft] = useState(room.expiresIn * 3600); // Convert hours to seconds

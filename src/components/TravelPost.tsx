@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 
 
-const TravelPost = (posts) => {
+const TravelPost = (posts: any) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [showingInterest, setShowingInterest] = useState(false);

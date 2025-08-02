@@ -4,24 +4,24 @@ import { useEffect, useState } from "react";
 
 const TripRoomsFeed = () => {
 
-const [tripRooms, setTripRooms] = useState(null);
+const [tripRooms, setTripRooms] = useState<any[]>([]);
 const [loading, setIsLoading] = useState(true);
 
-useEffect(() => {
-  const fetchRooms = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch("http://localhost:6080/api/triprooms/");
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-      const data = await res.json();
-      console.log("Fetched trip rooms:", data);
-      setTripRooms(data);
-    } catch (error) {
-      console.error("Error fetching trip rooms:", error);
-      // Use mock data as fallback
-      setTripRooms([
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch("http://localhost:6080/api/triprooms/");
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const data = await res.json();
+        console.log("Fetched trip rooms:", data);
+        setTripRooms(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching trip rooms:", error);
+        // Use mock data as fallback
+        setTripRooms([
         {
           id: '1',
           destination: 'Goa Beach Adventure',
@@ -103,9 +103,7 @@ if (loading) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
           {tripRooms.slice(0, 3).map((room, index) => (
-            // <div>{room.price}</div>
-            // <div>Hi</div>
-            <TripRoom {...room} />
+            <TripRoom key={room.id || room._id || index} {...room} />
           ))}
         </div>
 

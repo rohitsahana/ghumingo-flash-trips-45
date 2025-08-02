@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import TravelPostForm from "./ui/TravelPostForm";
+import { api, ApiErrorHandler } from "@/utils/apiErrorHandler";
 
 const TravelFeed = () => {
    const [posts, setPosts] = useState<any[]>([]);
@@ -12,15 +13,13 @@ const TravelFeed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const res = await fetch(`http://localhost:6080/api/travelposts/`);
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        const data = await res.json();
+        const data = await api.get(`http://localhost:6080/api/travelposts/`);
         console.log("Fetched travel posts:", data);
         setPosts(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching travel posts:", error);
+        const errorMessage = ApiErrorHandler.getErrorMessage(error);
+        console.error("Error details:", errorMessage);
         setPosts([]);
       }
     };

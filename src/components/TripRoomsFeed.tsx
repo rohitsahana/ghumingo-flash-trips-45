@@ -1,6 +1,7 @@
 
 import TripRoom from "./TripRoom";
 import { useEffect, useState } from "react";
+import { api, ApiErrorHandler } from "@/utils/apiErrorHandler";
 
 const TripRoomsFeed = () => {
 
@@ -11,15 +12,13 @@ const [loading, setIsLoading] = useState(true);
     const fetchRooms = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch("http://localhost:6080/api/triprooms/");
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        const data = await res.json();
+        const data = await api.get("http://localhost:6080/api/triprooms/");
         console.log("Fetched trip rooms:", data);
         setTripRooms(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching trip rooms:", error);
+        const errorMessage = ApiErrorHandler.getErrorMessage(error);
+        console.error("Error details:", errorMessage);
         // Use mock data as fallback
         setTripRooms([
         {

@@ -110,11 +110,10 @@ const Hero = () => {
           {/* Right Image */}
           <div className="relative">
             <div className="relative">
-              {/* Background removal temporarily disabled to prevent crashes
               <BackgroundRemovalProcessor 
                 imageUrl="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png"
                 onProcessed={setProcessedImageUrl}
-              /> */}
+              />
               {processedImageUrl ? (
                 <img 
                   src={processedImageUrl} 

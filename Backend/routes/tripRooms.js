@@ -35,4 +35,29 @@ router.post("/", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// Join a trip room
+router.post("/:id/join", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId, action } = req.body;
+    
+    const room = await TripRoom.findOne({ id: id });
+    if (!room) {
+      return res.status(404).json({ error: 'Trip room not found' });
+    }
+    
+    if (action === 'join' && room.spotsLeft > 0) {
+      room.spotsLeft = room.spotsLeft - 1;
+      await room.save();
+      res.json({ success: true, spotsLeft: room.spotsLeft });
+    } else {
+      res.status(400).json({ error: 'No spots left or invalid action' });
+    }
+  } catch (err) {
+    console.error('Failed to join room:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

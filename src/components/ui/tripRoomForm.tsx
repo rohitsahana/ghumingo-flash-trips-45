@@ -59,7 +59,7 @@ const TripRoomForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post("http://localhost:5000/api/triprooms", {
+      const res = await axios.post("http://localhost:6080/api/triprooms", {
         ...form,
         spotsLeft: Number(form.spotsLeft),
         totalSpots: Number(form.totalSpots),

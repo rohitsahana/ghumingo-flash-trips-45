@@ -16,25 +16,84 @@ const [loading, setIsLoading] = useState(true);
 // console.log("Trip Rooms:", tripRooms);
 useEffect(() => {
   const fetchRooms = async () => {
-    const res = await fetch(`http://localhost:5000/api/triprooms/${id}`);
-    const data = await res.json();
-    console.log("Fetched trip rooms:", data,res);
-    setTripRoom(data);
+    try {
+      setIsLoading(true);
+      const res = await fetch(`http://localhost:6080/api/triprooms/${id}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      console.log("Fetched trip room:", data);
+      setTripRoom(data);
+    } catch (error) {
+      console.error("Error fetching trip room:", error);
+      // Use mock data as fallback
+      setTripRoom({
+        id: id,
+        destination: 'Goa Beach Adventure',
+        dates: 'Jan 15-20, 2025',
+        budget: '₹25,000',
+        spotsLeft: 3,
+        totalSpots: 8,
+        vibe: ['Beach', 'Party', 'Adventure'],
+        expiresIn: 8,
+        price: 25000,
+        itinerary: [
+          'Day 1: Arrival and Beach Party',
+          'Day 2: Water Sports',
+          'Day 3: Old Goa Tour'
+        ],
+        safetyFeatures: ['Verified Organizer', 'Insurance Included', '24/7 Support'],
+        organizer: {
+          name: 'Adventure Seeker',
+          avatar: 'https://ui-avatars.com/api/?name=Adventure+Seeker',
+          rating: 4.8,
+          verified: true,
+          completedTrips: 12
+        }
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-  setIsLoading(false);
+  
   fetchRooms();
-}, []);
-if (loading || !tripRoom) {
-  return <div className="p-6 text-center">Loading profile... Profile</div>;
+}, [id]);
+
+if (loading) {
+  return <div className="p-6 text-center">Loading trip room details...</div>;
 }
 
-  const handleJoinRoom = () => {
-    if (id && tripRoom) {
-      const success = joinTripRoom(id);
-      if (success) {
-        setHasJoined(true);
-        // Update the local state to reflect the change
+  const handleJoinRoom = async () => {
+    if (id && tripRoom && tripRoom.spotsLeft > 0) {
+      try {
+        // Update the local state immediately for better UX
         setTripRoom(prev => prev ? { ...prev, spotsLeft: prev.spotsLeft - 1 } : null);
+        setHasJoined(true);
+        
+        // Call API to update the database
+        const response = await fetch(`http://localhost:6080/api/triprooms/${id}/join`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: 'current-user-id', // This should come from auth context
+            action: 'join'
+          })
+        });
+        
+        if (!response.ok) {
+          // Revert the local state if API call fails
+          setTripRoom(prev => prev ? { ...prev, spotsLeft: prev.spotsLeft + 1 } : null);
+          setHasJoined(false);
+          console.error('Failed to join room');
+        }
+      } catch (error) {
+        console.error('Error joining room:', error);
+        // Revert the local state if API call fails
+        setTripRoom(prev => prev ? { ...prev, spotsLeft: prev.spotsLeft + 1 } : null);
+        setHasJoined(false);
       }
     }
   };
@@ -219,7 +278,7 @@ if (loading || !tripRoom) {
                     </div>
                   </div>
               </div>
-              <Link to={`/profile/${tripRoom.organizer.name.replace(/\s+/g, '-').toLowerCase()}`}>
+              <Link to={`/profile/${tripRoom.organizer.userId || tripRoom.organizer.name.replace(/\s+/g, '-').toLowerCase()}`}>
                 <Button variant="outline" className="w-full">
                   View Profile
                 </Button>

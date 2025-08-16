@@ -1,73 +1,193 @@
-# Welcome to your Lovable project
+# Ghumingo Flash Trips - Travel Community Platform
 
-## Project info
+A full-stack travel community platform built with React (Frontend) and Node.js/Express (Backend) with MongoDB database.
 
-**URL**: https://lovable.dev/projects/ee4e3b3d-313a-46cd-95cb-d481de1050bf
+## 🚀 Quick Start
 
-## How can I edit this code?
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- MongoDB Atlas account (or local MongoDB)
 
-There are several ways of editing your application.
+### Project Structure
+```
+ghumingo-flash-trips-45-1/
+├── Backend/          # Node.js/Express API server
+├── src/             # React frontend application
+├── package.json     # Frontend dependencies
+└── README.md        # This file
+```
 
-**Use Lovable**
+## 📋 Setup Instructions
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ee4e3b3d-313a-46cd-95cb-d481de1050bf) and start prompting.
+### 1. Clone the Repository
+```bash
+git clone <your-repo-url>
+cd ghumingo-flash-trips-45-1
+```
 
-Changes made via Lovable will be committed automatically to this repo.
+### 2. Backend Setup
+```bash
+# Navigate to backend directory
+cd Backend
 
-**Use your preferred IDE**
+# Install dependencies
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Create .env file (if not exists)
+# The .env file should contain:
+PORT=6080
+MONGODB_URI=mongodb+srv://Preet:dejavu@preetsingh.a0rfk.mongodb.net/
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:8080
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Start the backend server
+npm start
+```
 
-Follow these steps:
+### 3. Frontend Setup
+```bash
+# Navigate back to root directory
+cd ..
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Install frontend dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the frontend development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## 🔄 How to Start After Closing Cursor
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Option 1: Manual Start (Recommended for development)
 
-**Use GitHub Codespaces**
+#### Start Backend:
+```bash
+# Open terminal in project root
+cd Backend
+npm start
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+#### Start Frontend (in a new terminal):
+```bash
+# Open another terminal in project root
+npm run dev
+```
 
-## What technologies are used for this project?
+### Option 2: Using the Startup Script
 
-This project is built with:
+I've created a startup script for convenience:
 
-- Vite
-- TypeScript
+```bash
+# Make the script executable (first time only)
+chmod +x start.sh
+
+# Run both backend and frontend
+./start.sh
+```
+
+### Option 3: Using npm scripts (if added to root package.json)
+
+```bash
+# Start both services
+npm run start:all
+```
+
+## 🌐 Access Points
+
+- **Frontend**: http://localhost:8080
+- **Backend API**: http://localhost:6080
+- **Health Check**: http://localhost:6080/api/health
+
+## 📡 API Endpoints
+
+### Available Routes:
+- `GET /api/health` - Health check
+- `GET /api/profile` - User profiles
+- `GET /api/stories` - Travel stories
+- `GET /api/travelposts` - Travel posts
+- `GET /api/triprooms` - Trip rooms
+- `GET /api/user-trip-interests` - User trip interests
+- `GET /api/user-verification` - User verification
+- `GET /api/travel-agents` - Travel agents
+- `GET /api/bookings` - Bookings
+
+## 🔧 Troubleshooting
+
+### Backend Issues:
+1. **Port already in use**: Kill the process using port 6080
+   ```bash
+   lsof -i :6080
+   kill -9 <PID>
+   ```
+
+2. **MongoDB connection failed**: Check your `.env` file and MongoDB Atlas connection string
+
+3. **Dependencies missing**: Run `npm install` in the Backend directory
+
+### Frontend Issues:
+1. **Port already in use**: The frontend will automatically use the next available port
+2. **Dependencies missing**: Run `npm install` in the root directory
+
+## 📝 Environment Variables
+
+### Backend (.env in Backend directory):
+```env
+PORT=6080
+MONGODB_URI=mongodb+srv://Preet:dejavu@preetsingh.a0rfk.mongodb.net/
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:8080
+```
+
+## 🛠️ Development
+
+### Backend Development:
+- Server runs on port 6080
+- Auto-restart on file changes (if using nodemon)
+- MongoDB connection with error handling
+- CORS configured for frontend
+
+### Frontend Development:
+- Vite dev server on port 8080
+- Hot module replacement
+- TypeScript support
+- Tailwind CSS for styling
+
+## 📦 Dependencies
+
+### Backend Dependencies:
+- Express.js
+- MongoDB/Mongoose
+- CORS
+- dotenv
+- body-parser
+
+### Frontend Dependencies:
 - React
-- shadcn-ui
+- TypeScript
+- Vite
 - Tailwind CSS
+- Shadcn/ui components
 
-## How can I deploy this project?
+## 🚀 Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/ee4e3b3d-313a-46cd-95cb-d481de1050bf) and click on Share -> Publish.
+### Backend Deployment:
+1. Set production environment variables
+2. Use PM2 or similar process manager
+3. Configure reverse proxy (nginx)
 
-## Can I connect a custom domain to my Lovable project?
+### Frontend Deployment:
+1. Build the project: `npm run build`
+2. Deploy to Vercel, Netlify, or similar
 
-Yes, you can!
+## 📞 Support
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+If you encounter any issues:
+1. Check the console logs for both backend and frontend
+2. Verify all environment variables are set correctly
+3. Ensure MongoDB connection is working
+4. Check if all dependencies are installed
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+---
+
+**Happy Coding! 🎉**

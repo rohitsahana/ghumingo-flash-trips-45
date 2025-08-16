@@ -9,6 +9,7 @@ const tripRoomSchema = new mongoose.Schema({
   spotsLeft: Number,
   totalSpots: Number,
   organizer: {
+    userId: String,
     name: String,
     avatar: String,
     rating: Number,

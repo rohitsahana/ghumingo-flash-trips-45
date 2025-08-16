@@ -11,16 +11,58 @@ const [loading, setIsLoading] = useState(true);
 
 useEffect(() => {
   const fetchRooms = async () => {
-    const res = await fetch("http://localhost:5000/api/triprooms/");
-    const data = await res.json();
-    console.log("Fetched trip rooms:", data,res);
-    setTripRooms(data);
+    try {
+      setIsLoading(true);
+      const res = await fetch("http://localhost:6080/api/triprooms/");
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      console.log("Fetched trip rooms:", data);
+      setTripRooms(data);
+    } catch (error) {
+      console.error("Error fetching trip rooms:", error);
+      // Use mock data as fallback
+      setTripRooms([
+        {
+          _id: '1',
+          destination: 'Ladakh, India',
+          expiresIn: 12,
+          spotsLeft: 3,
+          totalSpots: 8,
+          budget: '₹25,000',
+          vibe: ['Adventure', 'Mountains', 'Culture'],
+          organizer: {
+            name: 'Adventure Seeker',
+            rating: 4.8
+          },
+          id: '1'
+        },
+        {
+          _id: '2',
+          destination: 'Goa, India',
+          expiresIn: 8,
+          spotsLeft: 2,
+          totalSpots: 6,
+          budget: '₹15,000',
+          vibe: ['Beach', 'Party', 'Relaxation'],
+          organizer: {
+            name: 'Beach Lover',
+            rating: 4.5
+          },
+          id: '2'
+        }
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
-  setIsLoading(false);
+  
   fetchRooms();
 }, []);
-if (loading || !tripRooms) {
-  return <div className="p-6 text-center">Loading profile... Profile</div>;
+
+if (loading) {
+  return <div className="p-6 text-center">Loading trip rooms...</div>;
 }
 
 

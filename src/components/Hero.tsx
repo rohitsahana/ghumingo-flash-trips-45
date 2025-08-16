@@ -26,6 +26,11 @@ const Hero = () => {
             user ? (
               <>
                 <span className="text-gray-700">Welcome - {user.email.split("@")[0]}</span>
+                <Link to="/dashboard">
+                  <Button variant="ghost" className="text-gray-700 hover:text-orange-600">
+                    Dashboard
+                  </Button>
+                </Link>
                 <Button 
                   onClick={signOut}
                   variant="ghost" 
@@ -105,10 +110,10 @@ const Hero = () => {
           {/* Right Image */}
           <div className="relative">
             <div className="relative">
-              {/* <BackgroundRemovalProcessor 
+              <BackgroundRemovalProcessor 
                 imageUrl="/lovable-uploads/51c3853b-6180-4f9e-82b7-cc5d29fbc5d0.png"
                 onProcessed={setProcessedImageUrl}
-              /> */}
+              />
               {processedImageUrl ? (
                 <img 
                   src={processedImageUrl} 

@@ -22,4 +22,4 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/triprooms', tripRoomRoutes);
 app.use('/api/travelposts', a);
 const PORT =  5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); 
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

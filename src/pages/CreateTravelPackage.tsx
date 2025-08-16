@@ -207,7 +207,7 @@ const CreateTravelPackage = () => {
         })).filter(day => day.day.trim() && day.activities.length > 0)
       };
 
-      const response = await fetch('http://localhost:6080/api/travel-agents/travel-plans', {
+      const response = await fetch('/api/travel-agents/travel-plans', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

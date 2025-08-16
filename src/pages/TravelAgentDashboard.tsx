@@ -32,7 +32,7 @@ const TravelAgentDashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const response = await fetch(`http://localhost:6080/api/travel-agents/dashboard/${userEmail}`);
+      const response = await fetch(`/api/travel-agents/dashboard/${userEmail}`);
       
       if (response.ok) {
         const data = await response.json();
@@ -65,7 +65,7 @@ const TravelAgentDashboard = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:6080/api/travel-agents/travel-plans/${planId}`, {
+      const response = await fetch(`/api/travel-agents/travel-plans/${planId}`, {
         method: 'DELETE',
       });
 
@@ -89,7 +89,7 @@ const TravelAgentDashboard = () => {
 
   const handleUpdateBookingStatus = async (bookingId: string, status: string) => {
     try {
-      const response = await fetch(`http://localhost:6080/api/travel-agents/bookings/${bookingId}/status`, {
+      const response = await fetch(`/api/travel-agents/bookings/${bookingId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

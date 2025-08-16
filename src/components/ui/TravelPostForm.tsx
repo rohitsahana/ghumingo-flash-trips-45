@@ -33,7 +33,7 @@ const AddTravelPostForm = ({ onSuccess }) => {
     };
 
     try {
-      await axios.post("http://localhost:6080/api/travelposts", payload);
+      await axios.post("/api/travelposts", payload);
       alert("Travel post added!");
       setForm({
         content: "",

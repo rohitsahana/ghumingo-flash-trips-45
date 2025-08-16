@@ -42,7 +42,7 @@ const TripDetailModal = ({ isOpen, onClose, tripId, tripType, userEmail }: TripD
   const fetchInterestedUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:6080/api/user-trip-interests/trip/${tripId}`);
+      const response = await fetch(`/api/user-trip-interests/trip/${tripId}`);
       if (response.ok) {
         const data = await response.json();
         setInterestedUsers(data);
@@ -56,7 +56,7 @@ const TripDetailModal = ({ isOpen, onClose, tripId, tripType, userEmail }: TripD
 
   const handleRequestVerification = async (interestedUser: InterestedUser) => {
     try {
-      const response = await fetch("http://localhost:6080/api/user-verification/request-verification", {
+      const response = await fetch("/api/user-verification/request-verification", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

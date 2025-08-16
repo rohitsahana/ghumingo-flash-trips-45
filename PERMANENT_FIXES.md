@@ -38,7 +38,7 @@ Create these files in your project root:
 
 #### `.env` (Frontend)
 ```env
-VITE_API_URL=http://localhost:6080
+VITE_API_URL=
 VITE_SUPABASE_URL=https://wmgsraawxxmsvzrtpjds.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndtZ3NyYWF3eHhtc3Z6cnRwamRzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE2MTA4NjUsImV4cCI6MjA2NzE4Njg2NX0.YKtnJcaxzJ24TL09s7oepByxlG_r78xWF6DItoVrd5U
 ```
@@ -70,7 +70,7 @@ cd Backend && npm start  # Backend (port 6080)
 ### 3. **Health Check Endpoints**
 
 - Frontend: http://localhost:8080
-- Backend: http://localhost:6080/api/health
+- Backend: /api/health
 - Supabase: Check browser console for connection status
 
 ### 4. **Troubleshooting Guide**
@@ -90,7 +90,7 @@ cd Backend && npm start  # Backend (port 6080)
 #### If API Calls Fail:
 1. Verify backend is running on port 6080
 2. Check CORS configuration
-3. Test health endpoint: http://localhost:6080/api/health
+3. Test health endpoint: /api/health
 4. Review network tab in browser dev tools
 
 #### If Supabase Issues:
@@ -123,7 +123,7 @@ cd Backend && npm start  # Backend (port 6080)
 
 ### 7. **Development Best Practices**
 
-1. **Always check the health endpoint first**: `http://localhost:6080/api/health`
+1. **Always check the health endpoint first**: `/api/health`
 2. **Monitor browser console** for connection status messages
 3. **Use the ErrorBoundary** to catch and display errors gracefully
 4. **Test with network throttling** to ensure fallback data works

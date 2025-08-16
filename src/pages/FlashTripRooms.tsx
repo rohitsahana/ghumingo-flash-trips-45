@@ -13,7 +13,7 @@ useEffect(() => {
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch("http://localhost:6080/api/triprooms/");
+      const res = await fetch("/api/triprooms/");
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }

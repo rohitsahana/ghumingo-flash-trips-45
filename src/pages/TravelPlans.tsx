@@ -41,7 +41,7 @@ const TravelPlans = () => {
     setShowingInterest(planId);
     try {
       const plan = travelPlans.find(p => p.id === planId);
-      const response = await fetch('http://localhost:6080/api/user-trip-interests/', {
+      const response = await fetch('/api/user-trip-interests/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

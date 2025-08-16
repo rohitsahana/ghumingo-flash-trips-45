@@ -81,7 +81,7 @@ const VerificationModal = ({ isOpen, onClose, userEmail, onVerificationComplete 
 
     setIsUploading(true);
     try {
-      const response = await fetch("http://localhost:6080/api/user-verification/upload-aadhar", {
+      const response = await fetch("/api/user-verification/upload-aadhar", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

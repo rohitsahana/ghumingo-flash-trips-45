@@ -74,7 +74,7 @@ wait_for_services() {
     # Wait for backend
     echo "🔍 Checking backend health..."
     for i in {1..30}; do
-        if curl -s http://localhost:6080/api/health > /dev/null; then
+        if curl -s /api/health > /dev/null; then
             echo "✅ Backend is ready!"
             break
         fi
@@ -106,8 +106,8 @@ show_status() {
     echo "🎉 All services are running!"
     echo "============================"
     echo "🌐 Frontend: http://localhost:8080"
-    echo "🔧 Backend:  http://localhost:6080"
-    echo "📊 Health:   http://localhost:6080/api/health"
+    echo "🔧 Backend:  "
+    echo "📊 Health:   /api/health"
     echo ""
     echo "📝 Logs:"
     echo "  Backend:  tail -f backend.log"

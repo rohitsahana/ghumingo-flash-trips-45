@@ -18,7 +18,7 @@ const Profile = () => {
       setLoading(true);
       setError(null);
       try {
-        const url = userId ? `http://localhost:6080/api/profile/${userId}` : `http://localhost:6080/api/profile/`;
+        const url = userId ? `/api/profile/${userId}` : `/api/profile/`;
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

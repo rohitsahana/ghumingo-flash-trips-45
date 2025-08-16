@@ -180,7 +180,7 @@ const TravelAgentOnboarding = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost:6080/api/travel-agents/register', {
+      const response = await fetch('/api/travel-agents/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

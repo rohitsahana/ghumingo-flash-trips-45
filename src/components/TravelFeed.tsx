@@ -13,7 +13,7 @@ const TravelFeed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const data = await api.get(`http://localhost:6080/api/travelposts/`);
+        const data = await api.get(`/api/travelposts/`);
         console.log("Fetched travel posts:", data);
         setPosts(Array.isArray(data) ? data : []);
       } catch (error) {

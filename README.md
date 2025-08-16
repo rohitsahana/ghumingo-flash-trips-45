@@ -96,8 +96,8 @@ npm run start:all
 ## 🌐 Access Points
 
 - **Frontend**: http://localhost:8080
-- **Backend API**: http://localhost:6080
-- **Health Check**: http://localhost:6080/api/health
+- **Backend API**: 
+- **Health Check**: /api/health
 
 ## 📡 API Endpoints
 

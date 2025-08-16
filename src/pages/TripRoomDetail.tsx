@@ -18,7 +18,7 @@ useEffect(() => {
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const res = await fetch(`http://localhost:6080/api/triprooms/${id}`);
+      const res = await fetch(`/api/triprooms/${id}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -72,7 +72,7 @@ if (loading) {
         setHasJoined(true);
         
         // Call API to update the database
-        const response = await fetch(`http://localhost:6080/api/triprooms/${id}/join`, {
+        const response = await fetch(`/api/triprooms/${id}/join`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

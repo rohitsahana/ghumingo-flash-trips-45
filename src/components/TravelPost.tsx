@@ -29,7 +29,7 @@ const TravelPost = (posts: any) => {
 
     setShowingInterest(true);
     try {
-      const response = await fetch('http://localhost:6080/api/user-trip-interests/', {
+      const response = await fetch('/api/user-trip-interests/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

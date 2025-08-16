@@ -45,8 +45,8 @@ npm run start:frontend
 
 ## Access Points
 - **Frontend**: http://localhost:8080
-- **Backend**: http://localhost:6080
-- **Health Check**: http://localhost:6080/api/health
+- **Backend**: 
+- **Health Check**: /api/health
 
 ## Troubleshooting
 

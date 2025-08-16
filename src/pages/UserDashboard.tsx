@@ -173,7 +173,7 @@ const UserDashboard = () => {
     
     setLoadingInterestedTrips(true);
     try {
-      const response = await fetch(`http://localhost:6080/api/user-trip-interests/user/${user.email}`);
+      const response = await fetch(`/api/user-trip-interests/user/${user.email}`);
       if (response.ok) {
         const data = await response.json();
         setInterestedTrips(data);
@@ -203,7 +203,7 @@ const UserDashboard = () => {
     
     setLoadingMyTrips(true);
     try {
-      const response = await fetch(`http://localhost:6080/api/travelposts`);
+      const response = await fetch(`/api/travelposts`);
       if (response.ok) {
         const allPosts = await response.json();
         // Filter posts created by the current user
@@ -272,7 +272,7 @@ const UserDashboard = () => {
     if (!user?.email) return;
     
     try {
-      const response = await fetch(`http://localhost:6080/api/user-verification/status/${user.email}`);
+      const response = await fetch(`/api/user-verification/status/${user.email}`);
       if (response.ok) {
         const data = await response.json();
         setUserVerificationStatus(data);
@@ -286,7 +286,7 @@ const UserDashboard = () => {
     if (!user?.email) return;
     
     try {
-      const response = await fetch(`http://localhost:6080/api/travel-agents/status/${user.email}`);
+      const response = await fetch(`/api/travel-agents/status/${user.email}`);
       if (response.ok) {
         const data = await response.json();
         setIsTravelAgent(data.isApproved);
@@ -304,7 +304,7 @@ const UserDashboard = () => {
     
     setLoadingAgentTrips(true);
     try {
-      const response = await fetch(`http://localhost:6080/api/travel-agents/dashboard/${user.email}`);
+      const response = await fetch(`/api/travel-agents/dashboard/${user.email}`);
       if (response.ok) {
         const data = await response.json();
         setAgentTrips(data.travelPlans || []);
